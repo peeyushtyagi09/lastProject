@@ -12,8 +12,13 @@ const authRoutes = require("./src/routes/authRoutes");
 
 const app = express();
 
-// Enable CORS with specific options (customize as needed)
-app.use(cors());
+// Enable CORS with specific options for credentials
+app.use(
+  cors({
+    origin: "http://localhost:5173", // allow only frontend origin
+    credentials: true, // allow credentials (cookies, authorization headers, etc.)
+  })
+);
 
 // Set secure HTTP headers
 app.use(helmet());

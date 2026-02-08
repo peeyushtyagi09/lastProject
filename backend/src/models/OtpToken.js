@@ -40,7 +40,7 @@ const OtpTokenSchema = new Schema(
     {
         timestamps: true,
         versionKey: false // Optional: avoid __v field clutter for tokens
-    }
+    } 
 );
 
 // TTL index for automatic deletion after expiration
