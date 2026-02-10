@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const ctrl = require("../controllers/authController");
+const ctrl = require("../controllers/auth.Controller");
 const { authRequired } = require("../middleware/auth");
 const { otpLimiter } = require("../middleware/ratelimiter");
 // Import Joi-based validators from Validation middleware
-const { validateRegister, validateLogin } = require("../middleware/Validation");
+const { validateRegister, validateLogin } = require("../middleware/auth.Validation");
 
 // REGISTER: Create account
 router.post(

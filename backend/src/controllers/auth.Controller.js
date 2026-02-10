@@ -117,15 +117,20 @@ exports.verifyLoginOtp = async (req, res) => {
 };
 
 exports.refreshToken = async (req, res) => {
-    const { token } = req.body;
+    // Support token in body { token }, or fallback to Authorization: Bearer <token>
+    const authHeader = req.headers && req.headers.authorization;
+    const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
+    const token = (req.body && req.body.token) || bearerToken;
+
     if (!token) return res.status(400).json({ error: "Missing token" });
+
     try {
         const payload = jwt.verify(token, env.JWT_REFRESH_SECRET);
         const user = await User.findById(payload.sub);
         if (!user || user.tokenVersion !== payload.tv) throw new Error("Invalid token");
         const { accessToken, refreshToken } = signToken(user);
         return res.json({ accessToken, refreshToken });
-    } catch {
+    } catch (err) {
         return res.status(401).json({ error: "Invalid or expired refresh token" });
     }
 };

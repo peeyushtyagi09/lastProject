@@ -8,17 +8,18 @@ const helmet = require("helmet");
 
 const { globalLimiter } = require("./src/middleware/ratelimiter");
 const { connectdb } = require("./src/Database/db");
-const authRoutes = require("./src/routes/authRoutes");
+const authRoutes = require("./src/routes/auth.Routes");
+const ProjectRoutes = require("./src/routes/project.Routes");
 
 const app = express();
 
 // Enable CORS with specific options for credentials
-app.use(
-  cors({
-    origin: "http://localhost:5173", // allow only frontend origin
-    credentials: true, // allow credentials (cookies, authorization headers, etc.)
-  })
-);
+app.use(cors({
+  origin: 'http://localhost:5173', // Replace with your frontend's actual origin
+  credentials: true, // Allow cookies to be sent
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Specify allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+}));
 
 // Set secure HTTP headers
 app.use(helmet());
@@ -45,7 +46,7 @@ app.use(globalLimiter);
 connectdb();
 
 app.use("/api/auth", authRoutes);
-
+app.use("/api/project", ProjectRoutes);
 // 404 handler (last)
 // app.use((req, res) => {
 //   res.status(404).json({ message: "Resource not found" });

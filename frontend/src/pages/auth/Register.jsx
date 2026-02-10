@@ -1,13 +1,13 @@
-import Raect, {useState} from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 const Register = () => {
     const navigate = useNavigate();
     const { register } = useAuth();
 
     const [form, setForm] = useState({
-        name: "",
+        username: "",
         email: "",
         password: "",
     });
@@ -17,7 +17,7 @@ const Register = () => {
 
     const handleChange = (e) => {
         setForm({
-            ...form, 
+            ...form,
             [e.target.name]: e.target.value,
         });
     };
@@ -27,44 +27,53 @@ const Register = () => {
         setError(null);
         setLoading(true);
 
-        try{
+        try {
             await register(form);
-            navigate("/verify-email", { state: { email: form.email }});
-        }catch(err){
-            setError(err?.response?.data?.error|| "Registration failed");
-        }finally {
+            navigate("/verify-email", { state: { email: form.email } });
+        } catch (err) {
+            setError(err?.response?.data?.error || "Registration failed");
+        } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div> 
-            <h2> Register </h2>
+        <div>
+            <h2>Register</h2>
             {error && <p style={{ color: "red" }}>{error}</p>}
-            <form onSubmit={handleSubmit}> 
-                <div> 
+            <form onSubmit={handleSubmit}>
+                <div>
                     <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    value={form.name}
-                    onChange={handleChange}
-                    required
+                        type="text"
+                        name="username"
+                        placeholder="Username"
+                        value={form.username}
+                        onChange={handleChange}
+                        required
                     />
                 </div>
-                <div> 
+                <div>
                     <input
-                    type="email"
-                    name="email"
-                    placeholder="Password"
-                    value={form.password}
-                    onChange={handleChange}
-                    required
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        value={form.email}
+                        onChange={handleChange}
+                        required
                     />
                 </div>
-
+                <div>
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Password"
+                        value={form.password}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
                 <button type="submit" disabled={loading}>
-                    {loading ? "Creating account..." : "register"}
+                    {loading ? "Creating account..." : "Register"}
                 </button>
             </form>
         </div>

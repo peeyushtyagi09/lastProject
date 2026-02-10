@@ -27,7 +27,7 @@ const registerSchema = Joi.object({
         }),
     password: Joi.string()
         .min(8)
-        .max(50)
+        .max(500)
         .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).+$"))
         .required()
         .messages({
@@ -57,6 +57,7 @@ const loginSchema = Joi.object({
         })
 });
 
+
 // Middleware validators
 const validateRegister = (req, res, next) => {
     const { error } = registerSchema.validate(req.body, { abortEarly: false });
@@ -73,6 +74,7 @@ const validateLogin = (req, res, next) => {
     }
     next();
 };
+
 
 module.exports = {
     validateRegister,   

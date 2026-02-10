@@ -1,13 +1,4 @@
-import axios from "axios";
-
-const api = axios.create({
-    baseURL: import.meta.env.VITE_Backend_URL,
-    withCredentials: true, 
-    headers: {
-        "Context-Type": "application/json",
-    },
-});
-
+import api from "./api"
 // Register
 export const registerUser = async (data) => {
     const res = await api.post("/auth/register", data);
@@ -15,13 +6,13 @@ export const registerUser = async (data) => {
 }
 // Email VERIFY
 export const verifyEmailOtp = async (data) => {
-    const res = await api.post("/auth/verify/resend", data);
+    const res = await api.post("/auth/verify/confirm", data);
     return res.data;
 };
 
 // Login
 export const loginUser = async (data) => {
-    const res = await api.post("/auth/login/otp/verify", data);
+    const res = await api.post("/auth/login", data);
     return res.data;
 }
 
@@ -47,7 +38,7 @@ export const refreshToken = async () => {
 // LOGOUT
 export const logoutEverywhere = async (token) => {
     const res = await api.post(
-        "/auth/logout/everywhere",
+        "/auth/logout-everywhere",
         {},
         {
             headers: {
@@ -55,6 +46,12 @@ export const logoutEverywhere = async (token) => {
             },
         }
     );
+    return res.data;
+}
+
+//Resend OTP 
+export const resendVerifyOtp = async (data) => {
+    const res = await api.post("/auth/verify/resend", data);
     return res.data;
 }
 

@@ -1,12 +1,12 @@
 import React, {useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { resendVerifyOtp } from "../api/authApi";
+import { useAuth } from "../../context/AuthContext";
+import { resendVerifyOtp } from "../../api/auth.api";
 
 const VerifyEmail = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { verifyEmail } = useAuth();
+    const { verifyEmail, loginwithTokens } = useAuth();
 
     const email = location.state?.email;
     
@@ -21,7 +21,8 @@ const VerifyEmail = () => {
         setLoading(true);
         
         try {
-            await verifyEmail({ email, otp })
+           const data =  await verifyEmail({ email, otp })
+            loginwithTokens(data);
             navigate("/login");
         }catch (err) {
             setError(err?.response?.data?.error || "Verification failed");

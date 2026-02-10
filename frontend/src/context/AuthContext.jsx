@@ -1,11 +1,10 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import {
     loginUser, 
     registerUser, 
     verifyEmailOtp, 
-    refreshToken, 
     logoutEverywhere,
-} from "../api/authApi";
+} from "../api/auth.api";
 
 import { setToken, getToken, removeToken } from "../utils/token";
 
@@ -20,21 +19,14 @@ export const AuthProvider =  ({ children })=> {
     // restore session on refresh
     useEffect(() => {
         const initAuth = async () => {
-            if(!accessToken){
+            // If there is no access token, nothing to restore
+            if (!accessToken) {
                 setLoading(false);
                 return;
             }
-            try{
-                const data = await refreshToken();
-                setAccessToken(data.accessToken);
-                setToken(data.accessToken);
-                setUser(data.user || null);
-            }catch {
-                removeToken();
-                setUser(null);
-            }finally {
-                setLoading(false);
-            }
+            // We are not persisting a refresh token yet, so skip server refresh to avoid "Missing token"
+            // Keep the current accessToken in memory and finish loading
+            setLoading(false);
         };
 
         initAuth();
@@ -69,6 +61,14 @@ export const AuthProvider =  ({ children })=> {
         }
     };
 
+    const loginwithTokens = (data) => {
+        setAccessToken(data.accessToken);
+        setToken(data.accessToken);
+        setUser(data.user || null);
+    } 
+
+
+
     // Mistake: The isAuthenticated value is set using `!accessToken`, which means when there is NO accessToken, `isAuthenticated` is true (because !accessToken is true when accessToken is null/undefined). This is the opposite of what you usually want. Typically, isAuthenticated should be true when you HAVE an accessToken.
     // Fix: Use !!accessToken (double negation) instead of !accessToken.
 
@@ -82,6 +82,7 @@ export const AuthProvider =  ({ children })=> {
         register, 
         verifyEmail, 
         logout,
+        loginwithTokens
     };
 
     return (
