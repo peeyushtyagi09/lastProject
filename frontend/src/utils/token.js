@@ -1,4 +1,4 @@
-const TOKEN_KEY = "access_token";
+const TOKEN_KEY = "accessToken";
 
 export const setToken = (token) => {
     if(!token) return;

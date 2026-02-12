@@ -32,6 +32,7 @@ const Register = () => {
             navigate("/verify-email", { state: { email: form.email } });
         } catch (err) {
             setError(err?.response?.data?.error || "Registration failed");
+            console.log(err);
         } finally {
             setLoading(false);
         }
