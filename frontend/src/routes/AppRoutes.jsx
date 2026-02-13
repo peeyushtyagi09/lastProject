@@ -12,6 +12,10 @@ import VerifyLoginOtp from "../pages/auth/VerifyLoginOtp";
 import ProjectCreate from "../pages/project/Project.create";
 import ProjectList from "../pages/project/Project.list";
 
+//Event 
+import ProjectIngest from "../pages/Event/Event.ingest";
+
+
 import Dashboard from "../pages/Dashboard";
 import Landing from "../pages/Landing";
 
@@ -30,6 +34,9 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /> </ProtectedRoute>}/>
       <Route path="/create" element={ <ProtectedRoute> <ProjectCreate/> </ProtectedRoute> } />
       <Route path="/list" element={ <ProtectedRoute> <ProjectList/> </ProtectedRoute> } />
+      <Route path="/projects/:projectId/ingest" element={<ProtectedRoute><ProjectIngest /></ProtectedRoute>}
+/>
+
       
     </Routes>
   );

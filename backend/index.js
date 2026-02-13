@@ -48,7 +48,7 @@ connectdb();
 
 app.use("/api/auth", authRoutes);
 app.use("/api/project", ProjectRoutes);
-app.use("/api/event", EventRoutes);
+app.use("/api/events", EventRoutes);
 // 404 handler (last)
 // app.use((req, res) => {
 //   res.status(404).json({ message: "Resource not found" });

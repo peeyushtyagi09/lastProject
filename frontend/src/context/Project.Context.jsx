@@ -1,44 +1,10 @@
-// import React, {useContext, createContext, useState} from "react";
-// import { createProjectApi, listOfProjectApi } from "../api/Project.api";
-
-// const ProjectContext = createContext(null);
-
-// export const ProjectProvider = ({ children }) => {
-//     const [project, setProject] = useState([]);
-//     const [loading, setLoading] = useState(false);
-    
-//     const fetchProjects = async () => {
-//         setLoading(true);
-//         const res = listOfProjectApi();
-//         setProject(res.data.projects);
-//         setLoading(false);
-//     }
-
-//      const createProject = async (data) => {
-//         const res = await createProjectApi(data);
-//         setProject((prev) => [res.data.projects, ...prev]);
-//     };
-//     const value={
-//         project,
-//          loading,
-//          fetchProjects,
-//         createProject
-//     }
-//     return(
-//         <ProjectContext.Provider value={value}>
-//             {!loading && children}
-//         </ProjectContext.Provider>
-//     )
-// }
-
-// export const useProject = () => useContext(ProjectContext);
 import React, {useContext, createContext, useState} from "react";
 import { createProjectApi, listOfProjectApi } from "../api/Project.api";
 
 const ProjectContext = createContext(null);
 
 export const ProjectProvider = ({ children }) => {
-    const [project, setProject] = useState([]);
+    const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     
@@ -48,12 +14,12 @@ export const ProjectProvider = ({ children }) => {
             setError(null);
             const res = await listOfProjectApi(); // Added await here
             // Assuming the API returns { projects: [...] } or just [...]
-            setProject(res.Projects || res || []);
+            setProjects(res.Projects || res || []);
             // console.log(res.Projects)
         } catch (err) {
             console.error("Error fetching projects:", err);
             setError(err.message || "Failed to fetch projects");
-            setProject([]);
+            setProjects([]);
         } finally {
             setLoading(false);
         }
@@ -66,7 +32,7 @@ export const ProjectProvider = ({ children }) => {
             // Assuming the API returns the created project object
             const newProject = res.project || res;
             // console.log(newProject)
-            setProject((prev) => [newProject, ...prev]);
+            setProjects((prev) => [newProject, ...prev]);
             return { success: true, data: newProject };
         } catch (err) {
             console.error("Error creating project:", err);
@@ -76,7 +42,7 @@ export const ProjectProvider = ({ children }) => {
     };
 
     const value = {
-        project,
+        projects,
         loading,
         error,
         fetchProjects,
