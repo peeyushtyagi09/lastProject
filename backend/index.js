@@ -10,6 +10,7 @@ const { globalLimiter } = require("./src/middleware/ratelimiter");
 const { connectdb } = require("./src/Database/db");
 const authRoutes = require("./src/routes/auth.Routes");
 const ProjectRoutes = require("./src/routes/project.Routes");
+const EventRoutes = require("./src/routes/event.Routes");
 
 const app = express();
 
@@ -47,6 +48,7 @@ connectdb();
 
 app.use("/api/auth", authRoutes);
 app.use("/api/project", ProjectRoutes);
+app.use("/api/event", EventRoutes);
 // 404 handler (last)
 // app.use((req, res) => {
 //   res.status(404).json({ message: "Resource not found" });

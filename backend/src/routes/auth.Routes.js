@@ -4,7 +4,7 @@ const ctrl = require("../controllers/auth.Controller");
 const { authRequired } = require("../middleware/auth");
 const { otpLimiter } = require("../middleware/ratelimiter");
 // Import Joi-based validators from Validation middleware
-const { validateRegister, validateLogin } = require("../middleware/auth.Validation");
+const { validateRegister, validateLogin } = require("../validations/auth.Validation");
 
 // REGISTER: Create account
 router.post(

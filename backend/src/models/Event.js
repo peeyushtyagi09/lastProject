@@ -36,7 +36,7 @@ const EventSchema = new mongoose.Schema({
         maxlength: 100, 
         index: true
     },
-    Severity: {
+    severity: {
         type: String, 
         required: true, 
         enum: ["INFO", "WARN", "ERROR", "CRITICAL"],
@@ -49,7 +49,7 @@ const EventSchema = new mongoose.Schema({
         maxlength: 2000,
     },
     metadata: {
-        type: Schema.Types.Mixed,
+        type: mongoose.Schema.Types.Mixed,
         default: {},
     },
     environment: {
@@ -70,4 +70,4 @@ const EventSchema = new mongoose.Schema({
 // Compound index for fast project-based queries
 EventSchema.index({ projectId: 1, eventTimestamp: -1 });
 
-module.exports = model("Event", EventSchema);
+module.exports = mongoose.model("Event", EventSchema);
