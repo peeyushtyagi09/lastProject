@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Event = require("../models/Event");
 const Project = require("../models/Project");
+const { getIO } = require("../realtime/socket.server");
+const { emitEventToProject } = require("../realtime/socket.manager");
 
 const ingestEvent = async (req, res) => {
     try {
@@ -61,6 +63,10 @@ const ingestEvent = async (req, res) => {
             eventTimestamp,
         });
 
+        //Emit venet in real-time
+        const io = getIO();
+        emitEventToProject(io, projectId, event);
+        
         return res.status(201).json({
             message: "Event ingested successfully",
             eventId: event._id,

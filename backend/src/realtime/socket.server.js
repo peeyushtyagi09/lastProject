@@ -8,18 +8,18 @@ let io = null;
 
 function initializeSocketServer(httpServer) {
     io = new Server(httpServer, {
-        cors:{
+        cors: {
             origin: process.env.CLIENT_URL,
             methods: ["GET", "POST"],
         }
     });
 
-    //Middleware for authenticating ssocket connection
+    // Middleware for authenticating socket connection
     io.use(async (socket, next) => {
-        try{
+        try {
             const token = socket.handshake.auth?.token;
 
-            if(!token){
+            if (!token) {
                 return next(new Error("Authentication token missing"));
             }
 
@@ -27,7 +27,7 @@ function initializeSocketServer(httpServer) {
 
             socket.userId = user.id;
             next();
-        } catch(error){
+        } catch (error) {
             next(new Error("Authentication failed"));
         }
     });
@@ -38,23 +38,22 @@ function initializeSocketServer(httpServer) {
 
         registerSocketHandlers(io, socket);
 
-        socket.on("disconnect", () =>{
-            console.log(`Socket disconnected: ${socket.id} `)
+        socket.on("disconnect", () => {
+            console.log(`Socket disconnected: ${socket.id}`);
         });
     });
 
     return io;
-
 }
+
 function getIO() {
-    if(!io){
+    if (!io) {
         throw new Error("Socket.io not initialized");
     }
-        return io;
+    return io;
 }
 
 module.exports = {
     initializeSocketServer,
-    geetIO
-}
-
+    getIO
+};
