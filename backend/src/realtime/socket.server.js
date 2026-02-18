@@ -1,6 +1,7 @@
 const { Server } = require("socket.io");
 const { verifySocketToken } = require("./socket.auth");
 const { registerSocketHandlers } = require("./socket.manager");
+const { CLIENT_URL } = require("../../example.env");
 
 let io = null;
 
@@ -9,10 +10,10 @@ let io = null;
 function initializeSocketServer(httpServer) {
     io = new Server(httpServer, {
         cors: {
-            origin: process.env.CLIENT_URL,
+            origin: CLIENT_URL,
             methods: ["GET", "POST"],
         }
-    });
+    }); 
 
     // Middleware for authenticating socket connection
     io.use(async (socket, next) => {
@@ -27,6 +28,7 @@ function initializeSocketServer(httpServer) {
 
             socket.userId = user.id;
             next();
+            console.log("socket.server file me user tho authorizte")
         } catch (error) {
             next(new Error("Authentication failed"));
         }

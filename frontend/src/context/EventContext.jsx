@@ -17,8 +17,7 @@ export const EventProvider = ({ children }) => {
             const response = await ingestEventApi(projectId, data);
             setSuccess("Event ingested successfully");
             return response;
-        } catch (err) {
-            // Fix typo: "reponse" -> "response"
+        } catch (err) { 
             const message =
                 err.response?.data?.message ||
                 (Array.isArray(err.response?.data?.error) ? err.response.data.error[0] : undefined) ||

@@ -22,6 +22,7 @@ export const RealtimeProvider = ({ children, token }) => {
 
     const handleNewEvent = (eventData) => {
       setEvents((prev) => [eventData, ...prev]);
+      console.log("New event received");
     };
 
     socket.on("new-event", handleNewEvent);
@@ -55,9 +56,7 @@ export const RealtimeProvider = ({ children, token }) => {
   const clearEvents = useCallback(() => {
     setEvents([]);
   }, []);
-
-  // Optionally expose socket if future use needed (e.g., status indicator)
-  // const socket = socketRef.current;
+ 
 
   return (
     <RealtimeContext.Provider

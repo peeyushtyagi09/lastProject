@@ -13,9 +13,12 @@ const useRealtime = (projectId) => {
 
     clearEvents();
     subscribeToProject(projectId);
+    console.log("Aaa Aaa");
 
     return () => {
       unsubscribeFromProject(projectId);
+    console.log("ui ui");
+
       clearEvents();
     };
     // eslint-disable-next-line

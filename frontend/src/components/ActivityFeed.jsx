@@ -3,6 +3,7 @@ import { useRealtimeContext } from "../context/RealtimeContext";
 
 const ActivityFeed = () => {
   const { events } = useRealtimeContext();
+  console.log(events);
 
   if (!events || events.length === 0) {
     return (

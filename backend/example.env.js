@@ -27,6 +27,7 @@ const SMTP_PASS = process.env.SMTP_PASS || undefined;
 const SMTP_FROM = process.env.SMTP_FROM || undefined;
 const RATE_LIMIT_WINDOW_MS = process.env.RATE_LIMIT_WINDOW_MS ? parseMs(process.env.RATE_LIMIT_WINDOW_MS) : undefined;
 const RATE_LIMIT_MAX = process.env.RATE_LIMIT_MAX ? parseInt(process.env.RATE_LIMIT_MAX, 10) : undefined;
+const CLIENT_URL = process.env.CLIENT_URL;
 
 module.exports = {
     GLOBAL_RATE_LIMIT_WINDOW_MS,
@@ -47,4 +48,5 @@ module.exports = {
     SMTP_FROM,
     RATE_LIMIT_WINDOW_MS,
     RATE_LIMIT_MAX,
+    CLIENT_URL,
 };
