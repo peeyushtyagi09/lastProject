@@ -14,8 +14,10 @@ export const RealtimeProvider = ({ children, token }) => {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
+      console.log("No token");
       return;
     }
+    console.log("connection token", token);
 
     const socket = createSocketConnection(token);
     socketRef.current = socket;

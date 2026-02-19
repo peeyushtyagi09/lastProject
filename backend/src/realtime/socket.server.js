@@ -10,15 +10,15 @@ let io = null;
 function initializeSocketServer(httpServer) {
     io = new Server(httpServer, {
         cors: {
-            origin: CLIENT_URL,
+            origin: "*",
             methods: ["GET", "POST"],
         }
-    }); 
-
+    });  
     // Middleware for authenticating socket connection
     io.use(async (socket, next) => {
         try {
             const token = socket.handshake.auth?.token;
+            console.log("socket auth token: ", token);
 
             if (!token) {
                 return next(new Error("Authentication token missing"));

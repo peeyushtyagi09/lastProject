@@ -9,16 +9,21 @@ const useRealtime = (projectId) => {
   } = useRealtimeContext();
 
   useEffect(() => {
-    if (!projectId) return;
+    console.log("[useRealtime] effect triggered", { projectId });
+    if (!projectId) {
+      console.log("[useRealtime] No projectId provided:", projectId);
+      return;
+    }
 
+    console.log("[useRealtime] Clearing events for project:", projectId);
     clearEvents();
+    console.log("[useRealtime] Subscribing to project:", projectId);
     subscribeToProject(projectId);
-    console.log("Aaa Aaa");
 
     return () => {
+      console.log("[useRealtime] Unsubscribing from project:", projectId);
       unsubscribeFromProject(projectId);
-    console.log("ui ui");
-
+      console.log("[useRealtime] Clearing events on cleanup for project:", projectId);
       clearEvents();
     };
     // eslint-disable-next-line

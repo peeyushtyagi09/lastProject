@@ -1,10 +1,10 @@
 function registerSocketHandlers(io, socket){
     socket.on("subscribe", ({ projectId }) => {
-        if(projectId) {
+        if(!projectId) {
             return socket.emit("error", "Project Id is required");
         }
 
-        const roomName = `Project:${projectId}`;
+        const roomName = `project:${projectId}`;
 
         socket.join(roomName);
         console.log(`User ${socket.userId} joined ${roomName}`);

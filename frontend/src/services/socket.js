@@ -14,6 +14,7 @@ export const createSocketConnection = (token) => {
         reconnectionAttempts: 5, 
         reconnectionDelay: 2000,
     });
+     
     socket.on("connect", () => {
         console.log("Socket connected:", socket.id);
     });

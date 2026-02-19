@@ -5,7 +5,7 @@ import ActivityFeed from "../../components/ActivityFeed";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
-
+ 
   useRealtime(projectId);
 
   return (
