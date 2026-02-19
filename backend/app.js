@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 
-const { globalLimiter } = require("./src/middleware/ratelimiter");
+// const { globalLimiter } = require("./src/middleware/ratelimiter");
 
 const authRoutes = require("./src/routes/auth.Routes");
 const projectRoutes = require("./src/routes/project.Routes");
@@ -21,7 +21,7 @@ app.use(cors({
 app.use(helmet());
 app.use(express.json({ limit: "10kb" }));
 
-app.use(globalLimiter);
+// app.use(globalLimiter);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/project", projectRoutes);
