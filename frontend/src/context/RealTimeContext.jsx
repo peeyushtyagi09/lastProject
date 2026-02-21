@@ -23,7 +23,7 @@ export const RealtimeProvider = ({ children, token }) => {
     socketRef.current = socket;
 
     const handleNewEvent = (eventData) => {
-      setEvents((prev) => [eventData, ...prev]);
+      setEvents((prev) => [...prev, eventData]);
       console.log("New event received");
     };
 
