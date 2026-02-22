@@ -1,66 +1,84 @@
 import { useEffect } from "react";
-import { useRealtimeContext } from "../context/RealTimeContext";
+import { useRealtimeContext } from "../context/RealtimeContext";
+import { getProjectEvents } from "../api/event.api";
 
-/**
- * useRealtime custom hook
- * Handles real-time subscription for the given projectId.
- * Now with improved user feedback using Tailwind CSS notifications!
- */
 const useRealtime = (projectId) => {
   const {
     subscribeToProject,
     unsubscribeFromProject,
     clearEvents,
+    initializeEvents,
   } = useRealtimeContext();
 
   useEffect(() => {
-    // If no projectId provided, show a warning banner (optional)
+    let isMounted = true;
+
     if (!projectId) {
-      // Optional: You could render a notification component here.
       const warningBar = document.createElement("div");
       warningBar.className =
         "fixed top-4 left-1/2 -translate-x-1/2 bg-yellow-100 border border-yellow-300 text-yellow-900 px-4 py-2 rounded-md shadow z-50 animate-pulse";
       warningBar.textContent = "No project selected for realtime updates.";
       document.body.appendChild(warningBar);
-      setTimeout(() => { warningBar.remove(); }, 2500);
+      setTimeout(() => {
+        warningBar.remove();
+      }, 2500);
       return;
     }
 
-    // Event clearing notification
-    const clearBar = document.createElement("div");
-    clearBar.className =
-      "fixed top-4 left-1/2 -translate-x-1/2 bg-blue-100 border border-blue-300 text-blue-700 px-4 py-2 rounded-md shadow z-50";
-    clearBar.textContent = "Loading latest events...";
-    document.body.appendChild(clearBar);
+    const showBar = (text, className, duration = 2000) => {
+      const bar = document.createElement("div");
+      bar.className = className;
+      bar.textContent = text;
+      document.body.appendChild(bar);
+      setTimeout(() => {
+        bar.remove();
+      }, duration);
+      return bar;
+    };
 
-    clearEvents();
+    const clearBar = showBar(
+      "Loading latest events...",
+      "fixed top-4 left-1/2 -translate-x-1/2 bg-blue-100 border border-blue-300 text-blue-700 px-4 py-2 rounded-md shadow z-50",
+      2000
+    );
 
-    // Show subscription notification
-    setTimeout(() => {
-      clearBar.textContent = `Subscribed to project ${projectId} (Live updates enabled)`;
-      clearBar.className =
-        "fixed top-4 left-1/2 -translate-x-1/2 bg-green-100 border border-green-300 text-green-600 px-4 py-2 rounded-md shadow z-50 transition";
-    }, 600);
+    const loadHistoryAndSubscribe = async () => {
+      try {
+        clearEvents();
+        const data = await getProjectEvents(projectId, { limit: 50 });
+        if (!isMounted) return;
+        const reversed = data.events.reverse();
+        initializeEvents(reversed);
+        setTimeout(() => {
+          if (!clearBar) return;
+          clearBar.textContent = `Subscribed to project ${projectId} (Live updates enabled)`;
+          clearBar.className =
+            "fixed top-4 left-1/2 -translate-x-1/2 bg-green-100 border border-green-300 text-green-600 px-4 py-2 rounded-md shadow z-50 transition";
+        }, 600);
+      } catch (err) {
+        showBar(
+          "Failed to load events.",
+          "fixed top-4 left-1/2 -translate-x-1/2 bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-md shadow z-50",
+          2500
+        );
+        console.error("Failed to load history:", err);
+      }
+    };
 
+    loadHistoryAndSubscribe();
     subscribeToProject(projectId);
 
-    // Remove banner after a few seconds
-    const removeTimeout = setTimeout(() => { clearBar.remove(); }, 2000);
-
     return () => {
-      // Show unsubscribing notification
-      const unsubBar = document.createElement("div");
-      unsubBar.className =
-        "fixed top-4 left-1/2 -translate-x-1/2 bg-gray-100 border border-gray-300 text-gray-600 px-4 py-2 rounded-md shadow z-50";
-      unsubBar.textContent = `Unsubscribed from project ${projectId}`;
-      document.body.appendChild(unsubBar);
-      setTimeout(() => { unsubBar.remove(); }, 1500);
-
+      showBar(
+        `Unsubscribed from project ${projectId}`,
+        "fixed top-4 left-1/2 -translate-x-1/2 bg-gray-100 border border-gray-300 text-gray-600 px-4 py-2 rounded-md shadow z-50",
+        1500
+      );
+      isMounted = false;
       unsubscribeFromProject(projectId);
       clearEvents();
     };
-    // eslint-disable-next-line
-  }, [projectId]);
+  }, [projectId, subscribeToProject, unsubscribeFromProject, clearEvents, initializeEvents]);
 };
 
 export default useRealtime;

@@ -6,5 +6,6 @@ const ctrl = require("../controllers/event.controller");
 const {authRequired} = require("../middleware/auth");
 
 router.post("/ingest/:projectId",authRequired, validateEvent,  ctrl.ingestEvent );
+router.get("/:projectId", authRequired, ctrl.getProjectEvents);
 
 module.exports = router;

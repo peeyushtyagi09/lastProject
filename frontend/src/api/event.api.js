@@ -14,4 +14,10 @@ export const ingestEvent = async (projectId, data) => {
     return res.data;
 }
 
+export const getProjectEvents = async (projectId, params = {}) => {
+    const res = await api.get(`/events/${projectId}`, {
+        params,
+    });
+    return res.data;
+} 
 export default api;

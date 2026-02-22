@@ -9,13 +9,10 @@ const FLUSH_INTERVAL = 100;
 export const RealtimeProvider = ({ children, token }) => {
   const [events, setEvents] = useState([]);
   const socketRef = useRef(null);
-
   const eventQueueRef = useRef([]);
-
   const flushIntervalRef = useRef(null);
 
-  useEffect(() => {
-    // If no token, disconnect any existing socket and return
+  useEffect(() => { 
     if (!token) {
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -64,6 +61,11 @@ export const RealtimeProvider = ({ children, token }) => {
       eventQueueRef.current = [];
     };
   }, [token]);
+  
+  const initializeEvents = useCallback((initialEvents) => {
+    setEvents(initialEvents);
+  }, []);
+
 
   const subscribeToProject = useCallback((projectId) => {
     if (socketRef.current && projectId) {
@@ -83,7 +85,6 @@ export const RealtimeProvider = ({ children, token }) => {
     setEvents([]);
     eventQueueRef.current = [];
   }, []);
- 
 
   return (
     <RealtimeContext.Provider
@@ -92,6 +93,7 @@ export const RealtimeProvider = ({ children, token }) => {
         subscribeToProject,
         unsubscribeFromProject,
         clearEvents, 
+        initializeEvents,
       }}
     >
       {children}

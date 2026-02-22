@@ -80,6 +80,52 @@ const ingestEvent = async (req, res) => {
     }
 }
 
+const getProjectEvents = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const userId = req.user.id;
+
+        const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+
+        if(!mongoose.Types.ObjectId.isValid(projectId)) {
+            return res.status(400).json({
+                message: "Invalid projectId format"
+            });
+        }
+
+        const project = await Project.findById(projectId);
+
+        if(!project) {
+            return res.status(404).json({
+                message: "Project not found"
+            });
+        }
+
+        if (!project.ownerId || project.ownerId.toString() !== userId.toString()) {
+            return res.status(403).json({
+                message: "You are not authorized to view events for this project"
+            });
+        }
+
+        const events = await Event.find({ projectId })
+            .sort({ eventTimestamp: -1 })
+            .limit(limit)
+            .lean(); 
+
+        return res.status(200).json({
+            count: events.length, 
+            events
+        });
+
+    }catch (error) {
+        console.error("Get project events error:", error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+}
+
 module.exports = {
     ingestEvent,
+    getProjectEvents,
 };
