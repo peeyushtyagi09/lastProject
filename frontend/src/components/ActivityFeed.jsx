@@ -1,5 +1,5 @@
-import React from "react";
-import { List } from "react-window";
+import React, { useEffect, useRef, useState } from "react";
+import { List, useListRef } from "react-window";
 import { useRealtimeContext } from "../context/RealtimeContext";
 
 const SEVERITY_COLORS = {
@@ -51,6 +51,35 @@ const Row = ({ index, style, ariaAttributes, events }) => {
 
 const ActivityFeed = () => {
   const { events } = useRealtimeContext();
+  const listRef = useListRef();
+
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const containerRef = useRef(null);
+
+  // 🔹 Detect scroll position
+  const handleScroll = () => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const threshold = 50; // px tolerance
+    const atBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+
+    setIsAtBottom(atBottom);
+  };
+
+  // 🔹 Auto-scroll when new events arrive (only if at bottom)
+  useEffect(() => {
+    if (!listRef.current) return;
+
+    if (isAtBottom && events.length > 0) {
+      listRef.current.scrollToRow({
+        index: events.length - 1,
+        align: "end",
+        behavior: "smooth",
+      });
+    }
+  }, [events.length, isAtBottom, listRef]);
 
   if (!events || events.length === 0) {
     return (
@@ -61,19 +90,43 @@ const ActivityFeed = () => {
   }
 
   return (
-    <div className="p-4 h-[70vh]">
+    <div className="relative p-4">
       <h3 className="text-lg font-semibold mb-4 text-blue-700 flex items-center gap-2">
         <span className="material-symbols-outlined text-blue-500">bolt</span>
         Live Activity
       </h3>
 
-      <List
-        rowComponent={Row}
-        rowCount={events.length}
-        rowHeight={ROW_HEIGHT}
-        rowProps={{ events }}
-        style={{ height: 500 }}
-      />
+      {/* Scroll container */}
+      <div
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="h-[70vh] overflow-y-auto"
+      >
+        <List
+          listRef={listRef}
+          rowComponent={Row}
+          rowCount={events.length}
+          rowHeight={ROW_HEIGHT}
+          rowProps={{ events }}
+          style={{ height: "100%" }}
+        />
+      </div>
+
+      {/* Jump to Latest Button */}
+      {!isAtBottom && (
+        <button
+          onClick={() =>
+            listRef.current?.scrollToRow({
+              index: events.length - 1,
+              align: "end",
+              behavior: "smooth",
+            })
+          }
+          className="absolute bottom-6 right-6 bg-blue-600 text-white px-4 py-2 rounded shadow-lg hover:bg-blue-700 transition"
+        >
+          Jump to Latest
+        </button>
+      )}
     </div>
   );
 };
