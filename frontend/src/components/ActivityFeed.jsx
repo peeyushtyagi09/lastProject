@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { List, useListRef } from "react-window";
 import { useRealtimeContext } from "../context/RealtimeContext";
 
@@ -12,26 +12,44 @@ const SEVERITY_COLORS = {
 
 const ROW_HEIGHT = 110;
 
-const Row = ({ index, style, ariaAttributes, events }) => {
+/* =========================
+   Memoized Row Component
+========================= */
+
+const Row = React.memo(({ index, style, ariaAttributes, events }) => {
   const event = events[index];
+
+  // Memoize formatted date
+  const formattedDate = useMemo(() => {
+    return new Date(event.createdAt).toLocaleString();
+  }, [event.createdAt]);
+
+  // Memoize severity class
+  const severityClass = useMemo(() => {
+    return (
+      SEVERITY_COLORS[event.severity] ||
+      "bg-gray-100 text-gray-700"
+    );
+  }, [event.severity]);
 
   return (
     <div style={style} {...ariaAttributes} className="px-4">
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <span
-            className={`px-2 py-0.5 rounded font-medium text-xs ${
-              SEVERITY_COLORS[event.severity] || "bg-gray-100 text-gray-700"
-            }`}
+            className={`px-2 py-0.5 rounded font-medium text-xs ${severityClass}`}
           >
             {event.severity}
           </span>
+
           <span className="text-xs text-gray-400 ml-auto">
-            {new Date(event.createdAt).toLocaleString()}
+            {formattedDate}
           </span>
         </div>
 
-        <div className="text-gray-800 text-sm">{event.message}</div>
+        <div className="text-gray-800 text-sm">
+          {event.message}
+        </div>
 
         {event.service && (
           <div className="text-xs text-gray-400">
@@ -47,7 +65,11 @@ const Row = ({ index, style, ariaAttributes, events }) => {
       </div>
     </div>
   );
-};
+});
+
+/* =========================
+   ActivityFeed Component
+========================= */
 
 const ActivityFeed = () => {
   const { events } = useRealtimeContext();
@@ -56,19 +78,23 @@ const ActivityFeed = () => {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef(null);
 
-  // 🔹 Detect scroll position
+  // Memoize rowProps to keep reference stable
+  const rowProps = useMemo(() => {
+    return { events };
+  }, [events]);
+
   const handleScroll = () => {
     const el = containerRef.current;
     if (!el) return;
 
-    const threshold = 50; // px tolerance
+    const threshold = 50;
     const atBottom =
       el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
 
     setIsAtBottom(atBottom);
   };
 
-  // 🔹 Auto-scroll when new events arrive (only if at bottom)
+  // Auto-scroll only if user is at bottom
   useEffect(() => {
     if (!listRef.current) return;
 
@@ -76,7 +102,7 @@ const ActivityFeed = () => {
       listRef.current.scrollToRow({
         index: events.length - 1,
         align: "end",
-        behavior: "smooth",
+        behavior: "auto",
       });
     }
   }, [events.length, isAtBottom, listRef]);
@@ -96,7 +122,6 @@ const ActivityFeed = () => {
         Live Activity
       </h3>
 
-      {/* Scroll container */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
@@ -107,12 +132,11 @@ const ActivityFeed = () => {
           rowComponent={Row}
           rowCount={events.length}
           rowHeight={ROW_HEIGHT}
-          rowProps={{ events }}
+          rowProps={rowProps}
           style={{ height: "100%" }}
         />
       </div>
 
-      {/* Jump to Latest Button */}
       {!isAtBottom && (
         <button
           onClick={() =>
