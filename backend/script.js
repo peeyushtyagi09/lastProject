@@ -5,11 +5,11 @@ const axios = require("axios");
 ============================ */
 
 const PROJECT_ID = "6995d7619519560c10436ec8";
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OThjM2FlODg1MDgwMTNmYWI5NDIwZmUiLCJ0diI6NSwiaWF0IjoxNzcxNTA3NzA3LCJleHAiOjE3NzE1MDg2MDd9.7shTB9WX_12lAcR1Ypf02ObPARJIPiYL5Pp36FVHsQE";
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OThjM2FlODg1MDgwMTNmYWI5NDIwZmUiLCJ0diI6NiwiaWF0IjoxNzcxNzQyMTEyLCJleHAiOjE3NzE3NDMwMTJ9.AfGaooaiAM3sOHcb5Q41ahllTcOOgqxQ5NBa8ATagvY";
 
 const BASE_URL = "http://localhost:3000/api/events/ingest";
-const TOTAL_EVENTS = 3000;
-const DELAY_MS = 20;
+const TOTAL_EVENTS = 2000;
+const DELAY_MS = 10;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));

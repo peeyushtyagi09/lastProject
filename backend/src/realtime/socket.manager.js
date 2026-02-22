@@ -12,7 +12,7 @@ function registerSocketHandlers(io, socket){
 
     socket.on("unsubscribe", ({ projectId }) => {
         if(!projectId) return;
-        const roomName = `Project:${projectId}`;
+        const roomName = `project:${projectId}`;
         socket.leave(roomName);
         console.log(`User ${socket.userId} left ${roomName}`);
     })
