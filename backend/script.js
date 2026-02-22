@@ -5,7 +5,7 @@ const axios = require("axios");
 ============================ */
 
 const PROJECT_ID = "6995d7619519560c10436ec8";
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OThjM2FlODg1MDgwMTNmYWI5NDIwZmUiLCJ0diI6NiwiaWF0IjoxNzcxNzQyMTEyLCJleHAiOjE3NzE3NDMwMTJ9.AfGaooaiAM3sOHcb5Q41ahllTcOOgqxQ5NBa8ATagvY";
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OThjM2FlODg1MDgwMTNmYWI5NDIwZmUiLCJ0diI6NiwiaWF0IjoxNzcxNzUwODEyLCJleHAiOjE3NzE3NTE3MTJ9.GDDptdhB8uD9Ckf_fXZU6xwPKOHxsdnwPFFk_QzeaU0";
 
 const BASE_URL = "http://localhost:3000/api/events/ingest";
 const TOTAL_EVENTS = 2000;
