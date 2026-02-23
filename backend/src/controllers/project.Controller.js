@@ -19,12 +19,22 @@ exports.createProject = async(req, res) => {
         const project = await Project.create({
             projectName,
             description, 
-            ownerId,
+            ownerId, 
         });
+
+        const apiKey = project.generateIngestKey();
+        await project.save();
 
         return res.status(200).json({
             message: "Project Created SuccessFully", 
-            project
+            project: {
+                _id: project._id, 
+                prohectName: project.projectName, 
+                description: project.description, 
+                createAt: project.createAt,
+            }, 
+            ingestKey: apiKey, 
+            note: "Store this Api key securely.It will not be shown again."
         });
     }catch(error) {
         return res.status(500).json({

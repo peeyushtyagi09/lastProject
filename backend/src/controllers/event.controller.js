@@ -7,70 +7,43 @@ const { emitEventToProject } = require("../realtime/socket.manager");
 const ingestEvent = async (req, res) => {
     try {
         const { projectId } = req.params;
-        const userId = req.user.id; 
 
-        if (!mongoose.Types.ObjectId.isValid(projectId)) {
-            return res.status(400).json({
-                message: "Invalid projectId format"
-            });
-        }
-
-        const project = await Project.findById(projectId);
-
-        if (!project) {
-            return res.status(404).json({
-                message: "Project not found",
-            });
-        }
-
-        if (!project.ownerId || project.ownerId.toString() !== userId.toString()) {
-            return res.status(403).json({
-                message: "You are not authorized to ingest events for this project",
-            });
-        }
+        // project is already validated by apiKeyAuth middleware
+        const project = req.project;
 
         const {
             service,
             severity,
             message,
-            metadata, // this can be undefined; that's okay
+            metadata,
             environment,
             eventTimestamp
         } = req.body;
 
-        // Basic sanity check for required fields (customize as needed)
         if (!service || !severity || !message || !environment) {
             return res.status(400).json({
-                message: "Missing one or more required event fields",
+                message: "Missing required event fields",
             });
         }
-
-        // check that eventTimestamp is a valid ISO date string
-        // const parsedDate = new Date(eventTimestamp);
-        // if (isNaN(parsedDate.getTime())) {
-        //     return res.status(400).json({
-        //         message: "eventTimestamp must be a valid ISO date string",
-        //     });
-        // }
 
         const event = await Event.create({
             projectId,
             service,
             severity,
             message,
-            metadata: metadata || {}, // default to empty object if undefined
+            metadata: metadata || {},
             environment,
             eventTimestamp,
         });
 
-        //Emit venet in real-time
         const io = getIO();
         emitEventToProject(io, projectId, event);
-        
+
         return res.status(201).json({
             message: "Event ingested successfully",
             eventId: event._id,
         });
+
     } catch (error) {
         console.error("Event ingestion error:", error);
 
@@ -78,8 +51,7 @@ const ingestEvent = async (req, res) => {
             message: "Internal server error",
         });
     }
-}
-
+};
 const getProjectEvents = async (req, res) => {
     try {
         const { projectId } = req.params;
