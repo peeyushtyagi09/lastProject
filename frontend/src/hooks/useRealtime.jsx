@@ -1,14 +1,53 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useRealtimeContext } from "../context/RealtimeContext";
 import { getProjectEvents } from "../api/event.api";
 
 const useRealtime = (projectId) => {
   const {
+    events,
     subscribeToProject,
     unsubscribeFromProject,
     clearEvents,
     initializeEvents,
+    prependEvents,
   } = useRealtimeContext();
+
+  const loadOlderEvents = useCallback(async () => {
+    if (!projectId || !events.length) {
+      return { loaded: 0, done: true, error: null };
+    }
+
+    // FIX: Use the last element as the oldest event
+    const oldest = events[events.length - 1];
+    const before = oldest?.eventTimestamp;
+
+    if (!before) {
+      return { loaded: 0, done: true, error: null };
+    }
+
+    try {
+      const data = await getProjectEvents(projectId, {
+        limit: 50,
+        before,
+      });
+      // Filter out any potential duplicates by _id 
+      const existingIds = new Set(events.map(e => e._id));
+      const toPrepend = data.events
+        .reverse()
+        .filter(e => !existingIds.has(e._id));
+
+      prependEvents(toPrepend);
+
+      return {
+        loaded: toPrepend.length,
+        done: toPrepend.length === 0 || data.events.length < 50,
+        error: null
+      };
+    } catch (err) {
+      console.error("Failed to load older events:", err);
+      return { loaded: 0, done: false, error: err };
+    }
+  }, [projectId, events, prependEvents]);
 
   useEffect(() => {
     let isMounted = true;
@@ -79,6 +118,8 @@ const useRealtime = (projectId) => {
       clearEvents();
     };
   }, [projectId, subscribeToProject, unsubscribeFromProject, clearEvents, initializeEvents]);
+
+  return { loadOlderEvents };
 };
 
 export default useRealtime;

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { List, useListRef } from "react-window";
 import { useRealtimeContext } from "../context/RealtimeContext";
+import useRealtime from "../hooks/useRealtime";
 
 const SEVERITY_COLORS = {
   INFO: "bg-blue-100 text-blue-700",
@@ -71,11 +72,22 @@ const Row = React.memo(({ index, style, ariaAttributes, events }) => {
    ActivityFeed Component
 ========================= */
 
-const ActivityFeed = () => {
+const ActivityFeed = ({ projectId }) => {
   const { events } = useRealtimeContext();
   const listRef = useListRef();
+  const outerRef = useRef(null);
 
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  // Use the custom hook INSIDE the component, with projectId
+  // const { loadOlderEvents } = useRealtime(projectId);
+
+  // --- Pagination logic commented out ---
+  // const [isAtBottom, setIsAtBottom] = useState(true);
+  // const [loadingOlder, setLoadingOlder] = useState(false);
+  // const [showLoadingDelay, setShowLoadingDelay] = useState(false);
+  // const [olderEventCount, setOlderEventCount] = useState(0); // How many 50s loaded
+  // const [canLoadMore, setCanLoadMore] = useState(true);
+  // const loadingDelayTimer = useRef(null);
+
   const containerRef = useRef(null);
 
   // Memoize rowProps to keep reference stable
@@ -83,29 +95,88 @@ const ActivityFeed = () => {
     return { events };
   }, [events]);
 
-  const handleScroll = () => {
+  // --- Pagination logic commented out ---
+  /*
+  // Track if user is at bottom or not
+  const handleScroll = async () => {
     const el = containerRef.current;
     if (!el) return;
 
     const threshold = 50;
-    const atBottom =
-      el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
 
     setIsAtBottom(atBottom);
+
+    // Only act when at scroll top & more events can be loaded and not already loading
+    if (el.scrollTop < 50 && !loadingOlder && canLoadMore) {
+      if (olderEventCount === 0) {
+        setLoadingOlder(true);
+        const previousHeight = el.scrollHeight;
+        try {
+          const result = await loadOlderEvents();
+          if (result?.loaded > 0) {
+            setOlderEventCount(olderEventCount + 1);
+            setCanLoadMore(!result.done); // If done==true, can't load more
+          } else {
+            setCanLoadMore(false); // Nothing more
+          }
+        } finally {
+          setLoadingOlder(false);
+          // Maintain scroll position when content fills
+          requestAnimationFrame(() => {
+            const newHeight = el.scrollHeight;
+            el.scrollTop += newHeight - previousHeight;
+          });
+        }
+      } else {
+        // Only after the first 50, show 2s loader before next 50 loads
+        setShowLoadingDelay(true);
+        setLoadingOlder(true);
+        if (loadingDelayTimer.current) clearTimeout(loadingDelayTimer.current);
+        loadingDelayTimer.current = setTimeout(async () => {
+          setShowLoadingDelay(false);
+          const previousHeight = el.scrollHeight;
+          try {
+            const result = await loadOlderEvents();
+            if (result?.loaded > 0) {
+              setOlderEventCount(olderEventCount + 1);
+              setCanLoadMore(!result.done); // If done==true, can't load more
+            } else {
+              setCanLoadMore(false);
+            }
+          } finally {
+            setLoadingOlder(false);
+            requestAnimationFrame(() => {
+              const newHeight = el.scrollHeight;
+              el.scrollTop += newHeight - previousHeight;
+            });
+          }
+        }, 2000);
+      }
+    }
   };
 
-  // Auto-scroll only if user is at bottom
+  // Reset on projectId or events first load
+  useEffect(() => {
+    setOlderEventCount(0);
+    setCanLoadMore(true);
+    setShowLoadingDelay(false);
+    setLoadingOlder(false);
+    if (loadingDelayTimer.current) clearTimeout(loadingDelayTimer.current);
+  }, [projectId]);
+
+  // Auto-scroll to bottom when at bottom and new events
   useEffect(() => {
     if (!listRef.current) return;
-
     if (isAtBottom && events.length > 0) {
       listRef.current.scrollToRow({
         index: events.length - 1,
-        align: "end",
+        align: "top",
         behavior: "auto",
       });
     }
   }, [events.length, isAtBottom, listRef]);
+  */
 
   if (!events || events.length === 0) {
     return (
@@ -124,19 +195,36 @@ const ActivityFeed = () => {
 
       <div
         ref={containerRef}
-        onScroll={handleScroll}
+        // onScroll={handleScroll} // Pagination logic commented
         className="h-[70vh] overflow-y-auto"
       >
+        {/* (loadingOlder || showLoadingDelay) && (
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 rounded bg-blue-50 text-blue-600 px-3 py-1 text-xs shadow whitespace-nowrap animate-pulse">
+            {showLoadingDelay
+              ? "Loading even older events, please wait..."
+              : "Loading older events..."}
+          </div>
+        ) */}
         <List
           listRef={listRef}
           rowComponent={Row}
           rowCount={events.length}
           rowHeight={ROW_HEIGHT}
+          outerRef={outerRef}
+          // onScroll={handleScroll}
           rowProps={rowProps}
-          style={{ height: "100%" }}
+          style={{ height: "70vh" }}
         />
+        {/* 
+        {!canLoadMore && (
+          <div className="flex justify-center py-4 text-xs text-gray-400">
+            No more events to load.
+          </div>
+        )} 
+        */}
       </div>
 
+      {/* 
       {!isAtBottom && (
         <button
           onClick={() =>
@@ -150,7 +238,8 @@ const ActivityFeed = () => {
         >
           Jump to Latest
         </button>
-      )}
+      )} 
+      */}
     </div>
   );
 };

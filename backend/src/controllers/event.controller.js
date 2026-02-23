@@ -86,6 +86,7 @@ const getProjectEvents = async (req, res) => {
         const userId = req.user.id;
 
         const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+        const before = req.query.before;
 
         if(!mongoose.Types.ObjectId.isValid(projectId)) {
             return res.status(400).json({
@@ -107,7 +108,13 @@ const getProjectEvents = async (req, res) => {
             });
         }
 
-        const events = await Event.find({ projectId })
+        const query = { projectId };
+
+        if(before){
+            query.eventTimestamp = { $lt: new Date(before)};
+        }
+
+        const events = await Event.find(query)
             .sort({ eventTimestamp: -1 })
             .limit(limit)
             .lean(); 

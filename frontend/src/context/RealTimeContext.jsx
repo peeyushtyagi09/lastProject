@@ -67,6 +67,22 @@ export const RealtimeProvider = ({ children, token }) => {
   }, []);
 
 
+  const prependEvents = useCallback((olderEvents) => {
+    setEvents((prev) => {
+      const existingIds = new Set(prev.map(e => e._id));
+      const filtered = olderEvents.filter(e => !existingIds.has(e._id));
+
+      const combined = [...filtered, ...prev];
+
+      if(combined.length > MAX_EVENTS){
+        return combined.slice(0, MAX_EVENTS);
+      }
+
+      return combined;
+    });
+  }, []);
+
+
   const subscribeToProject = useCallback((projectId) => {
     if (socketRef.current && projectId) {
       setEvents([]);
@@ -94,6 +110,7 @@ export const RealtimeProvider = ({ children, token }) => {
         unsubscribeFromProject,
         clearEvents, 
         initializeEvents,
+        prependEvents,
       }}
     >
       {children}

@@ -5,7 +5,7 @@ import ActivityFeed from "../../components/ActivityFeed";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
-  useRealtime(projectId);
+  const { loadOlderEvents } = useRealtime(projectId);
 
   return (
     <div className="min-h-screen py-10 px-2 bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -22,7 +22,7 @@ const ProjectDetail = () => {
         </div>
         {/* ActivityFeed Section */}
         <div className="bg-white rounded-xl px-2 py-4 shadow-inner border border-blue-50 transition-shadow duration-150 hover:shadow-lg">
-          <ActivityFeed />
+          <ActivityFeed projectId={projectId} loadOlderEvents={loadOlderEvents} />
         </div>
       </div>
     </div>
