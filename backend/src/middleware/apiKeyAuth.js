@@ -1,44 +1,45 @@
 const mongoose = require("mongoose");
-const Project = require("../model/Project");
+const Project = require("../models/Project");
 
 const apiKeyAuth = async (req, res, next) => {
-    try{
+    try {
         const { projectId } = req.params;
         const providedKey = req.headers["x-api-key"];
 
-        if(!providedKey) {
+        if (!providedKey) {
             return res.status(401).json({
                 message: "API key missing"
             });
         }
 
-        if(!mongoose.Types.ObjectId.isValid(projectId)){
+        if (!mongoose.Types.ObjectId.isValid(projectId)) {
             return res.status(400).json({
                 message: "Invalid projectId format"
             });
         }
-        const project = await Project.findById(projectId).select("+ingestKeyHash");
 
-        if(!project) {
+        const project = await Project.findById(projectId).select("+ingestKeyHash");
+        if (!project) {
             return res.status(404).json({
                 message: "Project not found"
             });
         }
 
-        const isValid = projectId.verifyIngestKey(providedKey);
+        // FIX: Should call verifyIngestKey on the project, not projectId
+        const isValid = project.verifyIngestKey(providedKey);
 
-        if(!isValid){
+        if (!isValid) {
             return res.status(403).json({
-                message: "Invalid APi key"
+                message: "Invalid API key"
             });
         }
 
         req.project = project;
-
         next();
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({
-            message: "API Key authentication failed"
+            message: "API Key authentication failed",
+            error: error.message
         });
     }
 };

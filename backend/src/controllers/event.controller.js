@@ -26,18 +26,28 @@ const ingestEvent = async (req, res) => {
             });
         }
 
+        // Optional: eventTimestamp must be a valid ISO date string if provided
+        let usedEventTimestamp = new Date();
+        if (eventTimestamp) {
+            const ts = new Date(eventTimestamp);
+            if (isNaN(ts.getTime())) {
+                return res.status(400).json({ message: "Invalid eventTimestamp" });
+            }
+            usedEventTimestamp = ts;
+        }
+
         const event = await Event.create({
-            projectId,
+            projectId: project._id, // Use actual _id from fetched project for safety
             service,
             severity,
             message,
             metadata: metadata || {},
             environment,
-            eventTimestamp,
+            eventTimestamp: usedEventTimestamp,
         });
 
         const io = getIO();
-        emitEventToProject(io, projectId, event);
+        emitEventToProject(io, project._id.toString(), event.toObject ? event.toObject() : event); // emit plain object for socket if possible
 
         return res.status(201).json({
             message: "Event ingested successfully",

@@ -1,60 +1,64 @@
 const Project = require("../models/Project");
 
-exports.createProject = async(req, res) => {
-    try{
+exports.createProject = async (req, res) => {
+    try {
         const { projectName, description } = req.body;
-        const ownerId = req.user.id; 
+        const ownerId = req.user.id;
 
-        const existsProject = await Project.findOne ({
-            projectName, 
+        const existsProject = await Project.findOne({
+            projectName,
             ownerId,
         });
 
-        if(existsProject) {
+        if (existsProject) {
             return res.status(409).json({
                 message: "Project with this name already exists"
             });
         }
 
-        const project = await Project.create({
+        // Create new, UNSAVED project document
+        const project = new Project({
             projectName,
-            description, 
-            ownerId, 
+            description,
+            ownerId,
         });
 
+        // Generate apiKey and set the ingestKeyHash before save
         const apiKey = project.generateIngestKey();
+
+        // Now save after required field is set
         await project.save();
 
         return res.status(200).json({
-            message: "Project Created SuccessFully", 
+            message: "Project Created Successfully",
             project: {
-                _id: project._id, 
-                prohectName: project.projectName, 
-                description: project.description, 
-                createAt: project.createAt,
-            }, 
-            ingestKey: apiKey, 
-            note: "Store this Api key securely.It will not be shown again."
+                _id: project._id,
+                projectName: project.projectName, // Fixed typo
+                description: project.description,
+                createdAt: project.createdAt,
+            },
+            ingestKey: apiKey,
+            note: "Store this Api key securely. It will not be shown again."
         });
-    }catch(error) {
+    } catch (error) {
         return res.status(500).json({
-            message: "Failed to create Project", 
+            message: "Failed to create Project",
             error: error.message
-        })
+        });
     }
 };
 
 exports.listProject = async (req, res) => {
     try {
-        const ownerId = req.user.id; 
-        const Projects = await Project.find({ ownerId }).sort({ createdAt : -1});
+        const ownerId = req.user.id;
+        const Projects = await Project.find({ ownerId }).sort({ createdAt: -1 });
         return res.status(200).json({
             Projects,
-        });;
-    }catch(error) {
+        });
+    } catch (error) {
         res.status(500).json({
             message: "failed to fetch Project",
             error: error.message
-        })
+        });
     }
 };
