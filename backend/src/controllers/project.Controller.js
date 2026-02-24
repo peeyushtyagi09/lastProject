@@ -1,5 +1,5 @@
 const Project = require("../models/Project");
-
+const Audit = require("../models/AuditLog");
 exports.createProject = async (req, res) => {
     try {
         const { projectName, description } = req.body;
@@ -93,6 +93,17 @@ exports.rotateIngestKey = async (req, res) => {
         const newApiKey = project.generateIngestKey();
 
         await project.save();
+
+        try {
+            await AuditLog.create({
+                purpose: "KEY_ROTATED", 
+                projectId, 
+                userId, 
+                message: "API key rotated successfully"
+            });
+        }catch (e) {
+            console.error("Audit log error:", e);
+        }
 
         return res.status(200).json({
             message: "API key rotated successfully",

@@ -19,9 +19,16 @@ async function registerSocketHandlers(io, socket) {
             }
 
             if(project.ownerId.toString() !== socket.userId.toString()){
-                console.warn(
-                    `Unauthorized subscription attempt. User: ${socket.userId}, Project: ${projectId}`
-                );
+                try {
+                    await AuditLog.create({
+                        purpose: "SOCKET_UNAUTHORIZED", 
+                        projectId, 
+                        userId: socket.userId, 
+                        message: "Unauthorized socket subscription attempt"
+                    });
+                } catch (e){
+                    console.error("Audit log error:", e);
+                }
                 return socket.emit("subscription-error", "Unauthorized access to this project");
             }
 

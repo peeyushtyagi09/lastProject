@@ -1,12 +1,10 @@
-const RATE_LIMIT = 300;        // max events per window
-const WINDOW_MS = 60 * 1000;   // 1 minute
-
-// projectId -> { count, windowStart }
+const RATE_LIMIT = 300;        
+const WINDOW_MS = 60 * 1000;   
+ 
 const projectCounters = new Map();
 
-const projectRateLimiter = (req, res, next) => {
-    try {
-        // projectId could be in req.params or req.project (set by apiKeyAuth), fallback to req.project?._id
+const projectRateLimiter = async (req, res, next) => {
+    try { 
         let projectId = req.params && req.params.projectId;
         if (!projectId && req.project && req.project._id) {
             projectId = String(req.project._id);
@@ -35,8 +33,19 @@ const projectRateLimiter = (req, res, next) => {
         entry.count += 1;
 
         if (entry.count > RATE_LIMIT) {
+            try {
+                await AuditLog.create({
+                    purpose: "API_KEY_FAILED",
+                    projectId,
+                    ipAddress: req.ip, 
+                    message: "Project rate limit exceeded"
+                });
+            }catch (error) {
+                console.error("Audit log error:", e);
+            }
+
             return res.status(429).json({
-                message: "Rate limit exceeded for this project. Try again later."
+                message: "Rate limit exceeded for this project"
             });
         }
 

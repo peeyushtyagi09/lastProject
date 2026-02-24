@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Project = require("../models/Project");
+const AuditLog = require("../model/AuditLog");
 
 const apiKeyAuth = async (req, res, next) => {
     try {
@@ -29,9 +30,17 @@ const apiKeyAuth = async (req, res, next) => {
         const isValid = project.verifyIngestKey(providedKey);
 
         if (!isValid) {
-            return res.status(403).json({
-                message: "Invalid API key"
-            });
+            try{
+                await AuditLog.create({
+                    purpose: "API_KEY_FAILED", 
+                    projectId, 
+                    ipAddress: req.ip, 
+                    message: "Invalid API key attempt"
+                });
+            }catch (error) {
+                console.error("audit log error: ", error);
+            }
+            return res.status(403).json({ message: "Invalid API key"});
         }
 
         req.project = project;
