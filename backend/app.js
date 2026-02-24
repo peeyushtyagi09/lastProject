@@ -7,6 +7,7 @@ const helmet = require("helmet");
 const authRoutes = require("./src/routes/auth.Routes");
 const projectRoutes = require("./src/routes/project.Routes");
 const eventRoutes = require("./src/routes/event.Routes");
+const IncidentRoutes = require("./src/routes/incident.Routes");
 
 const app = express();
 
@@ -26,5 +27,6 @@ app.use(express.json({ limit: "10kb" }));
 app.use("/api/auth", authRoutes);
 app.use("/api/project", projectRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/incidents", IncidentRoutes)
 
 module.exports = app;

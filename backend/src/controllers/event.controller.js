@@ -3,6 +3,7 @@ const Event = require("../models/Event");
 const Project = require("../models/Project");
 const { getIO } = require("../realtime/socket.server");
 const { emitEventToProject } = require("../realtime/socket.manager");
+const Incident = require("../models/Incident");
 
 const ingestEvent = async (req, res) => {
     try {
@@ -45,6 +46,42 @@ const ingestEvent = async (req, res) => {
             environment,
             eventTimestamp: usedEventTimestamp,
         });
+
+        if (["ERROR", "CRITICAL"].includes(severity)) {
+
+            const messageSignature = message.trim().toLowerCase();
+        
+            const updated = await Incident.findOneAndUpdate(
+                {
+                    projectId: project._id,
+                    messageSignature,
+                    status: { $in: ["OPEN", "ACKNOWLEDGED"] }
+                },
+                {
+                    $set: {
+                        lastOccurredAt: usedEventTimestamp
+                    },
+                    $inc: {
+                        eventCount: 1
+                    }
+                },
+                {
+                    new: true
+                }
+            );
+        
+            if (!updated) {
+                await Incident.create({
+                    projectId: project._id,
+                    service,
+                    severity,
+                    messageSignature,
+                    firstOccurredAt: usedEventTimestamp,
+                    lastOccurredAt: usedEventTimestamp,
+                    eventCount: 1
+                });
+            }
+        }
 
         const io = getIO();
         emitEventToProject(io, project._id.toString(), event.toObject ? event.toObject() : event); // emit plain object for socket if possible
@@ -115,6 +152,4 @@ const getProjectEvents = async (req, res) => {
 }
 
 module.exports = {
-    ingestEvent,
-    getProjectEvents,
-};
+  
