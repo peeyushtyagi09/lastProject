@@ -41,7 +41,7 @@ async function registerSocketHandlers(io, socket) {
                 message: "Subscribed successfully"
             });
 
-            console.log(`User ${socket.userId} joined ${roomName}`);
+            console.log(`User ${socket.userId} joined ${roomName}`); 
         }catch(error){
             console.error("Subscription error:", error);
             socket.emit("subscription-error", "Subscription failed");
@@ -53,7 +53,7 @@ async function registerSocketHandlers(io, socket) {
         const roomName = `project:${projectId}`;
         socket.leave(roomName);
 
-        console.log(`User ${socket.userId} left ${roomName}`);
+        console.log(`User ${socket.userId} left ${roomName}`); 
     });
 }
 

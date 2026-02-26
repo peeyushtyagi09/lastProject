@@ -26,7 +26,9 @@ function initializeSocketServer(httpServer) {
 
             const user = await verifySocketToken(token);
 
-            socket.userId = user.id;
+            socket.userId = user.sub;
+            console.log("user", user);
+            console.log("user_sub", user.sub); 
             next();
             console.log("socket.server file me user tho authorizte")
         } catch (error) {

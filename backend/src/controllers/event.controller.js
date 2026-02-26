@@ -6,11 +6,13 @@ const { emitEventToProject } = require("../realtime/socket.manager");
 const Incident = require("../models/Incident");
 
 const ingestEvent = async (req, res) => {
-    try {
+    try { 
         const { projectId } = req.params;
-
-        // project is already validated by apiKeyAuth middleware
+ 
         const project = req.project;
+        if (!project || !project._id) {
+            return res.status(400).json({ message: "Invalid or missing project." });
+        }
 
         const {
             service,
@@ -20,14 +22,13 @@ const ingestEvent = async (req, res) => {
             environment,
             eventTimestamp
         } = req.body;
-
+ 
         if (!service || !severity || !message || !environment) {
             return res.status(400).json({
                 message: "Missing required event fields",
             });
         }
-
-        // Optional: eventTimestamp must be a valid ISO date string if provided
+ 
         let usedEventTimestamp = new Date();
         if (eventTimestamp) {
             const ts = new Date(eventTimestamp);
@@ -36,9 +37,9 @@ const ingestEvent = async (req, res) => {
             }
             usedEventTimestamp = ts;
         }
-
+ 
         const event = await Event.create({
-            projectId: project._id, // Use actual _id from fetched project for safety
+            projectId: project._id,
             service,
             severity,
             message,
@@ -46,11 +47,11 @@ const ingestEvent = async (req, res) => {
             environment,
             eventTimestamp: usedEventTimestamp,
         });
-
-        if (["ERROR", "CRITICAL"].includes(severity)) {
-
-            const messageSignature = message.trim().toLowerCase();
         
+ 
+        if (["ERROR", "CRITICAL"].includes(severity)) {
+            const messageSignature = message.trim().toLowerCase();
+
             const updated = await Incident.findOneAndUpdate(
                 {
                     projectId: project._id,
@@ -58,18 +59,12 @@ const ingestEvent = async (req, res) => {
                     status: { $in: ["OPEN", "ACKNOWLEDGED"] }
                 },
                 {
-                    $set: {
-                        lastOccurredAt: usedEventTimestamp
-                    },
-                    $inc: {
-                        eventCount: 1
-                    }
+                    $set: { lastOccurredAt: usedEventTimestamp },
+                    $inc: { eventCount: 1 }
                 },
-                {
-                    new: true
-                }
+                { new: true }
             );
-        
+
             if (!updated) {
                 await Incident.create({
                     projectId: project._id,
@@ -82,9 +77,9 @@ const ingestEvent = async (req, res) => {
                 });
             }
         }
-
+ 
         const io = getIO();
-        emitEventToProject(io, project._id.toString(), event.toObject ? event.toObject() : event); // emit plain object for socket if possible
+        emitEventToProject(io, project._id.toString(), event.toObject ? event.toObject() : event);
 
         return res.status(201).json({
             message: "Event ingested successfully",
@@ -99,57 +94,66 @@ const ingestEvent = async (req, res) => {
         });
     }
 };
+
 const getProjectEvents = async (req, res) => {
     try {
         const { projectId } = req.params;
-        const userId = req.user.id;
+        const userId = req.user && req.user.id;
 
-        const limit = Math.min(parseInt(req.query.limit) || 50, 200);
-        const before = req.query.before;
-
-        if(!mongoose.Types.ObjectId.isValid(projectId)) {
+        if (!mongoose.Types.ObjectId.isValid(projectId)) {
             return res.status(400).json({
                 message: "Invalid projectId format"
             });
         }
 
-        const project = await Project.findById(projectId);
+        const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+        const before = req.query.before;
 
-        if(!project) {
+        const project = await Project.findById(projectId);
+        if (!project) {
             return res.status(404).json({
                 message: "Project not found"
             });
         }
-
-        if (!project.ownerId || project.ownerId.toString() !== userId.toString()) {
+        if (!project.ownerId || project.ownerId.toString() !== userId?.toString()) {
             return res.status(403).json({
                 message: "You are not authorized to view events for this project"
             });
         }
 
-        const query = { projectId };
-
-        if(before){
-            query.eventTimestamp = { $lt: new Date(before)};
+        // Fixing: "Class constructor ObjectId cannot be invoked without 'new'"
+        const objectId = new mongoose.Types.ObjectId(projectId);
+        const query = { projectId: objectId };
+        console.log("projectId", objectId);
+        if (before) {
+            const beforeDate = new Date(before);
+            if (isNaN(beforeDate.getTime())) {
+                return res.status(400).json({
+                    message: "Invalid 'before' parameter; must be a valid date."
+                });
+            }
+            query.eventTimestamp = { $lt: beforeDate };
         }
 
         const events = await Event.find(query)
             .sort({ eventTimestamp: -1 })
             .limit(limit)
-            .lean(); 
+            .lean();
 
         return res.status(200).json({
-            count: events.length, 
+            count: events.length,
             events
         });
 
-    }catch (error) {
+    } catch (error) {
         console.error("Get project events error:", error);
         return res.status(500).json({
             message: "Internal server error"
         });
     }
-}
+};
 
 module.exports = {
-  
+    ingestEvent,
+    getProjectEvents
+};

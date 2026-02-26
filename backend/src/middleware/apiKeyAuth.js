@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Project = require("../models/Project");
-const AuditLog = require("../model/AuditLog");
+const AuditLog = require("../models/AuditLog");
 
 const apiKeyAuth = async (req, res, next) => {
     try {
