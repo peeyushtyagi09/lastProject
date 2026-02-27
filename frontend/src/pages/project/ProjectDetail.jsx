@@ -1,43 +1,61 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useRealtime from "../../hooks/useRealtime";
 import ActivityFeed from "../../components/ActivityFeed";
 import IncidentSummary from "../../components/Incidents/IncidentSummary";
 import IncidentList from "../../components/Incidents/IncidentList";
 import { getProjectIncidents } from "../../api/incident.api";
+import { useRealtimeContext } from "../../context/RealtimeContext";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
-  const [incidents, setIncidents] = useState([]);
   const [loadingIncidents, setLoadingIncidents] = useState(true);
   const [error, setError] = useState(null);
   const { loadOlderEvents } = useRealtime(projectId);
 
-  // Fetch incidents for the project
-  const fetchIncidents = useCallback(async () => {
-    setLoadingIncidents(true);
-    setError(null);
+  // Use incidents from realtime context only; keep local incidents state here
+  const {
+    incidents,
+    initializeIncidents
+  } = useRealtimeContext();
+
+
+  // Initial load: fetch incidents from API and set to local state
+  useEffect(() => {
+    let cancelled = false;
+    const fetchInitialIncidents = async () => {
+      setLoadingIncidents(true);
+      setError(null);
+      try {
+        const data = await getProjectIncidents(projectId);
+        if (!cancelled) {
+          initializeIncidents(data.incidents || []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError("Failed to fetch incidents.");
+          initializeIncidents([]);
+        }
+      } finally {
+        if (!cancelled) setLoadingIncidents(false);
+      }
+    };
+
+    if (projectId) fetchInitialIncidents();
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, initializeIncidents]);
+
+  const refreshIncidents = async () => {
     try {
       const data = await getProjectIncidents(projectId);
-      setIncidents(data.incidents || []);
-    } catch (err) {
-      setError("Failed to fetch incidents.");
-      setIncidents([]);
-    } finally {
-      setLoadingIncidents(false);
+      initializeIncidents(data.incidents || []);
+    }catch(err){
+      console.error("Failed to refresh incidents", err);
     }
-  }, [projectId]);
-
-  useEffect(() => {
-    if (projectId) {
-      fetchIncidents();
-    }
-  }, [projectId, fetchIncidents]);
-
-  // Handle update of incidents from child components
-  const handleIncidentsUpdate = () => {
-    fetchIncidents();
   };
+ 
 
   return (
     <div className="min-h-screen py-10 px-2 bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -86,7 +104,7 @@ const ProjectDetail = () => {
               ) : error ? (
                 <div className="text-red-500 py-3 text-center">{error}</div>
               ) : (
-                <IncidentList incidents={incidents} onUpdate={handleIncidentsUpdate} />
+                <IncidentList incidents={incidents} onUpdate={refreshIncidents} />
               )}
             </div>
           </aside>

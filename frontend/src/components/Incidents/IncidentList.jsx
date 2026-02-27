@@ -1,13 +1,25 @@
 import React from "react";
 import { updateIncidentStatus } from "../../api/incident.api";
 
+// Utility to show error feedback to the user (basic example)
+const showError = (msg) => {
+    alert(msg || "Something went wrong updating incident status");
+};
+
 const IncidentList = ({ incidents, onUpdate }) => {
     const handleStatusChange = async (id, status) => {
-        await updateIncidentStatus(id, status);
-        onUpdate();
+        try { 
+            await updateIncidentStatus(id, status);
+            onUpdate();
+        } catch (err) {
+            if (err?.response?.status === 404) {
+                showError("Incident not found or invalid update. The incident may have been deleted.");
+            } else {
+                showError(err?.message);
+            }
+        }
     };
 
-    // Properly render empty state
     if (!incidents || incidents.length === 0) {
         return (
             <div className="incident-list-empty" style={{ padding: "2em", textAlign: "center", color: "#777" }}>
@@ -97,5 +109,7 @@ const IncidentList = ({ incidents, onUpdate }) => {
         </div>
     );
 };
+
+
 
 export default IncidentList;

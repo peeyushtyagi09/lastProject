@@ -46,13 +46,14 @@ const ingestEvent = async (req, res) => {
             metadata: metadata || {},
             environment,
             eventTimestamp: usedEventTimestamp,
-        });
+        }); 
         
- 
+        const io = getIO();
+
         if (["ERROR", "CRITICAL"].includes(severity)) {
             const messageSignature = message.trim().toLowerCase();
 
-            const updated = await Incident.findOneAndUpdate(
+            const incident = await Incident.findOneAndUpdate(
                 {
                     projectId: project._id,
                     messageSignature,
@@ -65,8 +66,8 @@ const ingestEvent = async (req, res) => {
                 { new: true }
             );
 
-            if (!updated) {
-                await Incident.create({
+            if (!incident) {
+               incident =  await Incident.create({
                     projectId: project._id,
                     service,
                     severity,
@@ -76,10 +77,18 @@ const ingestEvent = async (req, res) => {
                     eventCount: 1
                 });
             }
-        }
- 
-        const io = getIO();
-        emitEventToProject(io, project._id.toString(), event.toObject ? event.toObject() : event);
+            console.log("realtime:", projectId);
+            io.to(`project:${projectId}`).emit(
+                "incident-updated",
+                incident.toObject ? incident.toObject() : incident
+            );
+    }
+
+        emitEventToProject(
+            io, 
+            project._id.toString(), 
+            event.toObject ? event.toObject() : event
+        )
 
         return res.status(201).json({
             message: "Event ingested successfully",

@@ -5,24 +5,25 @@ const RealtimeContext = createContext(undefined);
 const MAX_EVENTS = 50;
 const FLUSH_INTERVAL = 100;
 
-
 export const RealtimeProvider = ({ children, token }) => {
   const [events, setEvents] = useState([]);
+  const [incidents, setIncidents] = useState([]);
   const socketRef = useRef(null);
   const eventQueueRef = useRef([]);
   const flushIntervalRef = useRef(null);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (!token) {
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
-      setEvents([]);
       eventQueueRef.current = [];
-      console.log("No token ");
+      setEvents([]);
+      setIncidents([]);
       return;
     }
+
     console.log("connection token", token);
 
     const socket = createSocketConnection(token);
@@ -30,12 +31,24 @@ export const RealtimeProvider = ({ children, token }) => {
 
     const handleNewEvent = (eventData) => {
       eventQueueRef.current.push(eventData);
-    }
+    };
 
     socket.on("new-event", handleNewEvent);
+ 
+
+    const handleIncidentUpdate = (incidentData) => {
+      setIncidents((prev) => {
+        const filtered = prev.filter(
+          (i) => i._id !== incidentData._id
+        );
+        return [incidentData, ...filtered];
+      });
+    };
+
+    socket.on("incident-updated", handleIncidentUpdate);
 
     flushIntervalRef.current = setInterval(() => {
-      if(eventQueueRef.current.length === 0) return;
+      if (eventQueueRef.current.length === 0) return;
 
       const batch = eventQueueRef.current;
       eventQueueRef.current = [];
@@ -43,15 +56,16 @@ export const RealtimeProvider = ({ children, token }) => {
       setEvents((prev) => {
         const combined = [...prev, ...batch];
 
-        if(combined.length > MAX_EVENTS) {
+        if (combined.length > MAX_EVENTS) {
           return combined.slice(combined.length - MAX_EVENTS);
         }
         return combined;
       });
     }, FLUSH_INTERVAL);
-    
+
     return () => {
       socket.off("new-event", handleNewEvent);
+      socket.off("incident-updated", handleIncidentUpdate);
       socket.disconnect();
       socketRef.current = null;
 
@@ -61,27 +75,34 @@ export const RealtimeProvider = ({ children, token }) => {
       eventQueueRef.current = [];
     };
   }, [token]);
-  
+
+
+
   const initializeEvents = useCallback((initialEvents) => {
-    setEvents(initialEvents);
+    setEvents(initialEvents || []);
   }, []);
 
+  const initializeIncidents = useCallback((initialIncidents) => {
+    setIncidents(initialIncidents || []);
+  }, []);
 
   const prependEvents = useCallback((olderEvents) => {
     setEvents((prev) => {
-      const existingIds = new Set(prev.map(e => e._id));
-      const filtered = olderEvents.filter(e => !existingIds.has(e._id));
+      const existingIds = new Set(prev.map((e) => e._id));
+
+      const filtered = olderEvents.filter(
+        (e) => !existingIds.has(e._id)
+      );
 
       const combined = [...filtered, ...prev];
 
-      if(combined.length > MAX_EVENTS){
+      if (combined.length > MAX_EVENTS) {
         return combined.slice(0, MAX_EVENTS);
       }
 
       return combined;
     });
   }, []);
-
 
   const subscribeToProject = useCallback((projectId) => {
     if (socketRef.current && projectId) {
@@ -106,10 +127,12 @@ export const RealtimeProvider = ({ children, token }) => {
     <RealtimeContext.Provider
       value={{
         events,
+        incidents,
         subscribeToProject,
         unsubscribeFromProject,
-        clearEvents, 
+        clearEvents,
         initializeEvents,
+        initializeIncidents,
         prependEvents,
       }}
     >
@@ -118,6 +141,7 @@ export const RealtimeProvider = ({ children, token }) => {
   );
 };
 
+// Move useRealtimeContext to its own file for proper Fast Refresh behavior
 export const useRealtimeContext = () => {
   const context = useContext(RealtimeContext);
   if (!context) {

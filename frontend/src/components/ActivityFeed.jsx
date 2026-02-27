@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useRef, useMemo } from "react";
 import { List, useListRef } from "react-window";
 import { useRealtimeContext } from "../context/RealtimeContext";
 import useRealtime from "../hooks/useRealtime";
@@ -75,7 +75,9 @@ const Row = React.memo(({ index, style, ariaAttributes, events }) => {
 const ActivityFeed = ({ projectId }) => {
   const { events } = useRealtimeContext();
   const listRef = useListRef();
-  const outerRef = useRef(null);
+
+  // outerRef is not passed to List anymore (fix for React DOM warning)
+  // const outerRef = useRef(null);
 
   // Use the custom hook INSIDE the component, with projectId
   // const { loadOlderEvents } = useRealtime(projectId);
@@ -210,7 +212,8 @@ const ActivityFeed = ({ projectId }) => {
           rowComponent={Row}
           rowCount={events.length}
           rowHeight={ROW_HEIGHT}
-          outerRef={outerRef}
+          // Removed outerRef to avoid React DOM warning
+          // outerRef={outerRef}
           // onScroll={handleScroll}
           rowProps={rowProps}
           style={{ height: "70vh" }}
