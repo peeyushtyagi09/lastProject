@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const { CLIENT_PRO_URL } = require("./example.env");
 
 // const { globalLimiter } = require("./src/middleware/ratelimiter");
 const { performanceTimer } = require("./src/middleware/performanceTimer");
@@ -15,7 +16,7 @@ const app = express();
 
 // CORS
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: CLIENT_PRO_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"]
