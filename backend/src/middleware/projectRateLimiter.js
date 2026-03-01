@@ -1,3 +1,4 @@
+const mertics = require("../utils/metrics");
 const RATE_LIMIT = 300;        
 const WINDOW_MS = 60 * 1000;   
  
@@ -52,6 +53,7 @@ const projectRateLimiter = async (req, res, next) => {
         next();
 
     } catch (error) {
+        metrics.incrementRateLimitHit();
         console.error("Project rate limiter error:", error);
         return res.status(500).json({
             message: "Rate limiter failure"

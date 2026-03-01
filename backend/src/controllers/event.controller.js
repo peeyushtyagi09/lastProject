@@ -4,6 +4,7 @@ const Project = require("../models/Project");
 const { getIO } = require("../realtime/socket.server");
 const { emitEventToProject } = require("../realtime/socket.manager");
 const Incident = require("../models/Incident");
+const metrics = require("../utils/metrics");
 
 const ingestEvent = async (req, res) => {
     try { 
@@ -47,6 +48,7 @@ const ingestEvent = async (req, res) => {
             environment,
             eventTimestamp: usedEventTimestamp,
         }); 
+        metrics.incrementEvent();
         
         const io = getIO();
 
