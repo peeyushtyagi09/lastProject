@@ -5,7 +5,7 @@ import ActivityFeed from "../../components/ActivityFeed";
 import IncidentSummary from "../../components/Incidents/IncidentSummary";
 import IncidentList from "../../components/Incidents/IncidentList";
 import { getProjectIncidents } from "../../api/incident.api";
-import { useRealtimeContext } from "../../context/RealtimeContext";
+import { useRealtimeContext } from "../../context/RealTimeContext";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();

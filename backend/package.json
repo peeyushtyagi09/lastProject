@@ -13,6 +13,7 @@
     "http": "^0.0.1-security",
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.0",
     "mongoose": "^9.1.6",
     "nodemailer": "^8.0.0",
     "os": "^0.1.2",
