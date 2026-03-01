@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Project = require("../models/Project");
 const AuditLog = require("../models/AuditLog");
+const metrics = require("../utils/metrics");
 
 const apiKeyAuth = async (req, res, next) => {
     try {
@@ -46,6 +47,7 @@ const apiKeyAuth = async (req, res, next) => {
         req.project = project;
         next();
     } catch (error) {
+        metrics.incrementApiKeyFailure();
         return res.status(500).json({
             message: "API Key authentication failed",
             error: error.message
