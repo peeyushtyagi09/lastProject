@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from "react";
-import { useRealtimeContext } from "../context/RealtimeContext";
+import { useRealtimeContext } from "../context/RealTimeContext";
 import { getProjectEvents } from "../api/event.api";
 
 const useRealtime = (projectId) => {

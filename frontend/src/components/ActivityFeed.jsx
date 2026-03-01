@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from "react";
 import { List, useListRef } from "react-window";
-import { useRealtimeContext } from "../context/RealtimeContext";
+import { useRealtimeContext } from "../context/RealTimeContext";
 import useRealtime from "../hooks/useRealtime";
 
 const SEVERITY_COLORS = {
