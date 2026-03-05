@@ -39,7 +39,7 @@ async function sendEmail({ to, subject, text, html }) {
             { to, subject },
             err.message
         );
-        throw new Error("Failed to send email", err);
+        throw new Error("Failed to send email");
     }
 }
 

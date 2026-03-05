@@ -1,4 +1,5 @@
 const http = require("http");
+const net = require("net");
 const app = require("./app");
 const { connectdb } = require("./src/Database/db");
 const { initializeSocketServer, getIO } = require("./src/realtime/socket.server");
@@ -9,6 +10,19 @@ let socketServerInitialized = false;
 async function startServer() {
     try {
         await connectdb();
+
+        // Temporary SMTP quick test
+        const socket = net.createConnection(587, "smtp.gmail.com");
+
+        socket.on("connect", () => {
+            console.log("SMTP reachable");
+            socket.end();
+        });
+
+        socket.on("error", err => {
+            console.error("SMTP connection error:", err.message);
+        });
+        // End SMTP quick test
 
         const server = http.createServer(app);
 
