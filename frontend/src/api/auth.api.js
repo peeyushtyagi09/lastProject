@@ -2,6 +2,7 @@ import api from "./api"
 // Register
 export const registerUser = async (data) => {
     const res = await api.post("/auth/register", data);
+    console.log(res.data);
     return res.data;
 }
 // Email VERIFY
