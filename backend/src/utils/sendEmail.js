@@ -10,13 +10,14 @@ const transporter = nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: Number(env.SMTP_PORT) || 587,
     secure: false,
+    family: 4,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
     auth: {
         user: env.SMTP_USER,
         pass: env.SMTP_PASS,
-    },
-    // tls: {
-    //     rejectUnauthorized: process.env.NODE_ENV === "production",
-    // },
+    }, 
 });
 
 async function sendEmail({ to, subject, text, html }) {
