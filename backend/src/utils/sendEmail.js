@@ -1,23 +1,25 @@
 const nodemailer = require("nodemailer");
-const env = require("../../example.env");
 
-function requireEnv(key) {
-    if (!env[key]) throw new Error(`Missing required environment variable: ${key}`);
+function requireEnvVar(key) {
+    if (!process.env[key]) {
+        throw new Error(`Missing required environment variable: ${key}`);
+    }
 }
-["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "SMTP_FROM"].forEach(requireEnv);
+["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "SMTP_FROM"].forEach(requireEnvVar);
 
 const transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: Number(env.SMTP_PORT) || 587,
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT) || 587,
     secure: false,
+    requireTLS: true,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
     family: 4,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
-    auth: {
-        user: env.SMTP_USER,
-        pass: env.SMTP_PASS,
-    }, 
 });
 
 async function sendEmail({ to, subject, text, html }) {
@@ -26,7 +28,7 @@ async function sendEmail({ to, subject, text, html }) {
     }
     try {
         const result = await transporter.sendMail({
-            from: env.SMTP_FROM,
+            from: process.env.SMTP_FROM,
             to,
             subject,
             text,
