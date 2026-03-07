@@ -12,7 +12,7 @@ async function startServer() {
         await connectdb();
 
         // Temporary SMTP quick test
-        const socket = net.createConnection(587, "smtp.gmail.com");
+        const socket = net.createConnection(465, "smtp.gmail.com");
 
         socket.on("connect", () => {
             console.log("SMTP reachable");

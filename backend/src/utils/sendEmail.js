@@ -9,7 +9,7 @@ function requireEnvVar(key) {
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 467,
+    port: Number(process.env.SMTP_PORT) || 465,
     secure: true,
     requireTLS: true,
     auth: {
