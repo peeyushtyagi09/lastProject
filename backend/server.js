@@ -11,19 +11,6 @@ async function startServer() {
     try {
         await connectdb();
 
-        // Temporary SMTP quick test
-        const socket = net.createConnection(465, "smtp.gmail.com");
-
-        socket.on("connect", () => {
-            console.log("SMTP reachable");
-            socket.end();
-        });
-
-        socket.on("error", err => {
-            console.error("SMTP connection error:", err.message);
-        });
-        // End SMTP quick test
-
         const server = http.createServer(app);
 
         const io = initializeSocketServer(server);
