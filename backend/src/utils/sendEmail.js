@@ -1,62 +1,79 @@
 const sgMail = require("@sendgrid/mail");
+const env = require("../../example.env");
 
-function requireEnvVar(key) {
-    if (!process.env[key]) {
-        throw new Error(`Missing required environment variable: ${key}`);
-    }
+// Defensive config load from env file. Use centralized config.
+if (!env.SENDGRID_API_KEY || !env.SMTP_FROM) {
+    throw new Error("SENDGRID_API_KEY and SMTP_FROM must be defined in environment/config");
 }
 
-["SENDGRID_API_KEY", "SMTP_FROM"].forEach(requireEnvVar);
+sgMail.setApiKey(env.SENDGRID_API_KEY);
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 async function sendEmail({ to, subject, text, html }) {
-    if (!to || !subject || (!text && !html)) {
-        throw new Error("Missing email recipient, subject, or content");
-    }
+    if (!to) throw new Error("Missing email recipient");
+    if (!subject) throw new Error("Missing email subject");
+    if (!text && !html) throw new Error("Missing email content");
 
     try {
-        const result = await sgMail.send({
+        const [result] = await sgMail.send({
             to,
-            from: process.env.SMTP_FROM,
+            from: env.SMTP_FROM,
             subject,
             text,
             html
         });
-
         return result;
-    } catch (err) {
-        console.error("Failed to send email:", { to, subject }, err.message);
+    } catch (err) { 
+        if (err.response && err.response.body && err.response.body.errors) {
+            console.error("Failed to send email", {
+                to,
+                subject,
+                errors: err.response.body.errors
+            });
+        } else {
+            console.error("Failed to send email", {
+                to,
+                subject,
+                err: err.message || err
+            });
+        } 
         throw new Error("Failed to send email");
     }
 }
 
 async function sendOtpEmail(to, code, purpose) {
-    const title =
-        purpose === "verify"
-            ? "Verify your email address"
-            : "Your login code";
+    if (!to) throw new Error("Recipient email address is required");
+    if (!code) throw new Error("OTP code is required");
+    if (!purpose || !["verify", "login"].includes(purpose)) {
+        throw new Error(`Purpose must be one of "verify" or "login", received "${purpose}"`);
+    }
 
-    const plainText = `Your ${purpose} code is: ${code}
+    const isVerification = purpose === "verify";
+    const subject = isVerification ? "Verify Your Email Address" : "Your Login Code";
 
-This code will expire soon and should only be used by you. If you did not request this, you can ignore this message.`;
+    const textContent = 
+`${isVerification ? "Verification" : "Login"} code: ${code}
+
+This code will expire shortly and should only be used by you.
+If you did not request this code, please disregard this email.
+`;
 
     const htmlContent = `
-      <div style="font-family:Arial,sans-serif;max-width:400px;margin:auto;background:#fafbfc;padding:32px 24px;border-radius:8px;border:1px solid #e0e4ea;">
-        <h2 style="color:#222;font-size:22px;margin-bottom:18px;">${title}</h2>
-        <p>Enter this code:</p>
-        <p style="font-size:32px;letter-spacing:6px;font-weight:bold;background:#eff4fb;padding:12px 0;margin:16px 0;border-radius:6px;text-align:center;">
-          ${code}
-        </p>
-        <p>This code expires soon. If you did not request it, you can ignore this email.</p>
-        <p style="color:#757575;font-size:13px;margin-top:16px;">— Support Team</p>
-      </div>
+        <div style="font-family:Arial,sans-serif;max-width:420px;margin:auto;background-color:#f9fafb;padding:32px 26px;border-radius:10px;border:1px solid #e3e7ed;">
+            <h2 style="color:#222b45;font-size:24px;margin-bottom:18px;">${subject}</h2>
+            <p style="font-size:16px;">Please enter the following code:</p>
+            <div style="display:inline-block;font-size:34px;letter-spacing:8px;font-weight:600;background-color:#e8f0fe;padding:14px 0;margin:18px 0 18px 0;border-radius:8px;text-align:center;width:100%;">
+                ${code}
+            </div>
+            <p style="font-size:15px;">This code will expire soon. If you did not request this email, you can safely ignore it.</p>
+            <p style="color:#7b8794;font-size:13px;margin-top:20px;">&mdash; The Support Team</p>
+        </div>
     `;
 
-    await sendEmail({
+    return sendEmail({
         to,
-        subject: title,
-        text: plainText,
+        subject,
+        text: textContent,
         html: htmlContent
     });
 }
