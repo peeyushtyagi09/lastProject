@@ -1,13 +1,16 @@
-const axios = require("axios"); // Fixed typo
+const axios = require("axios");
 
 /* ============================
    CONFIGURATION
 ============================ */
 
-const PROJECT_ID = "6995d7619519560c10436ec8";
-const API_KEY = "f71202bbaa98f8514300630b2f6fa0f291ceb0bbc1e56481fd22ab82f5ca593c";
+// Update BASE_URL to point to the actual ingest endpoint.
+// According to your note and the 404 response, it should be /api/events/PROJECT_ID
+const PROJECT_ID = "69ad186912aa27c90fc442c1";
+const API_KEY = "eed914205e072877fa36ccc3e835f0a1927e21deaaa42c6d5e84816f12d574b0";
 
-const BASE_URL = "http://localhost:3000/api/events/ingest";
+// The correct ingest route is /api/events/:projectId (see express app and route registration)
+const BASE_URL = "https://lastproject-0dc1.onrender.com/api/events/ingest";
 const TOTAL_EVENTS = 2000;
 const DELAY_MS = 200;
 
@@ -54,6 +57,7 @@ async function runLoadTest() {
     // Use a message signature to avoid always same for each test run
     const message = `Load test event ${i} ${randomString(6)}`;
     try {
+      // POST to the correct ingest endpoint
       const resp = await axios.post(
         `${BASE_URL}/${PROJECT_ID}`,
         {
@@ -89,7 +93,6 @@ async function runLoadTest() {
             console.error("Message:", err.response.data.message);
           }
           if (error500Count <= 5) {
-            // Show diagnostic data only a few times to avoid flooding
             console.error("Full error:", err.response.data);
           }
           await sleep(500); // Wait longer for 500s to reduce hammering!

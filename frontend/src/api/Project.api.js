@@ -20,4 +20,8 @@ export const listOfProjectApi = async () => {
     return res.data;
 }
 
+export const projectrotatekey = async () => {
+    const res = await api.post("/project/:projectId/rotate-key");
+    return res.data;
+}
 export default api;
