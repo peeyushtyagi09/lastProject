@@ -1,57 +1,51 @@
-# OpsPulse 🚀
+<h1 align="center">Apilogs 🚀</h1>
 
-**Real-Time Monitoring Platform | MERN Stack**
+<p align="center">
+  <strong>Real-Time Monitoring Platform | MERN Stack</strong>
+</p>
 
-A production-grade, multi-tenant monitoring platform that ingests structured events and renders them efficiently through a performance-optimized React interface.
+<p align="center">
+  A production-grade, multi-tenant monitoring platform that ingests structured events, manages incidents, and renders them efficiently through a performance-optimized React interface utilizing real-time WebSockets.
+</p>
 
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-6+-green.svg)](https://mongodb.com/)
-[![WebSocket](https://img.shields.io/badge/WebSocket-Real--Time-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-18+-green.svg" alt="Node.js" />
+  <img src="https://img.shields.io/badge/React-19-blue.svg" alt="React" />
+  <img src="https://img.shields.io/badge/Vite-7-purple.svg" alt="Vite" />
+  <img src="https://img.shields.io/badge/TailwindCSS-4-38B2AC.svg" alt="TailwindCSS" />
+  <img src="https://img.shields.io/badge/MongoDB-6+-green.svg" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Socket.io-Real--Time-orange.svg" alt="Socket.io" />
+</p>
 
 ---
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Problem Statement](#problem-statement)
-- [Architecture](#architecture)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [API Documentation](#api-documentation)
-- [Security](#security)
-- [Performance](#performance)
-- [Development Phases](#development-phases)
-- [Contributing](#contributing)
-- [License](#license)
+- [Overview](#-overview)
+- [Architecture](#%EF%B8%8F-architecture)
+- [Features](#-features)
+- [Tech Stack](#%EF%B8%8F-tech-stack)
+- [Project Structure](#-project-structure)
+- [Installation](#-installation)
+- [Environment Variables](#-environment-variables)
+- [API Documentation](#-api-documentation)
+- [Security](#-security)
+- [Performance & UX](#-performance--ux)
+- [License](#-license)
 
 ---
 
 ## 🎯 Overview
 
-OpsPulse is a **project-based, real-time monitoring platform** designed to handle massive volumes of system events with enterprise-grade performance and security. It’s inspired by the way SaaS platforms like DataDog, New Relic, or Splunk operate at scale.
+Apilogs is a **project-based, real-time monitoring and incident management platform** designed to handle system events with enterprise-grade performance and security. It draws inspiration from modern SaaS observability tools, enabling teams to monitor, audit, and analyze system health in real time.
 
 ### Key Capabilities
-- 🏗️ **Project-Based Architecture**: Organize monitoring around logical boundaries
-- 📊 **Real-Time Event Streaming**: WebSocket-based live updates
-- 🔒 **Multi-Tenant Security**: Strict data isolation between users
-- ⚡ **High-Performance UI**: Virtualized rendering for 100k+ events
-- 🎯 **Structured Event Ingestion**: RESTful APIs for seamless integration
-
----
-
-## 🚨 Problem Statement
-
-Modern engineering teams face critical challenges with observability:
-
-| Challenge                       | Impact                        | OpsPulse Solution                 |
-|----------------------------------|-------------------------------|-----------------------------------|
-| **Massive Log Volumes**          | UI freezes, poor UX           | Virtualized rendering + pagination|
-| **Continuous Event Streams**     | Real-time = hard on UI        | Optimized WebSocket streaming     |
-| **Data Isolation**               | Security vulnerabilities      | Project-scoped multi-tenancy      |
-| **Slow Dashboards**              | Poor developer experience     | Performance-engineered React      |
+- 🏗️ **Project-Based Architecture**: Organize monitoring around logical boundaries with dedicated projects.
+- ⚡ **Real-Time Event Streaming**: Socket.io-based live event ingestion and instant UI updates.
+- 🔐 **Advanced Authentication**: Secure login via OTP, powered by JWT and SendGrid/Nodemailer.
+- 🚦 **Incident Management**: Track and manage critical system incidents.
+- 📜 **Audit Logging**: Comprehensive audit trails for system actions.
+- 🎨 **High-Performance UI**: Modern dashboard built with React 19, TailwindCSS, Framer Motion, and GSAP.
 
 ---
 
@@ -59,107 +53,91 @@ Modern engineering teams face critical challenges with observability:
 
 ### System Overview
 
-Event Sources → Ingestion API → Database → Streaming Layer → React UI
+Event Sources → Ingestion API → Validation → MongoDB → WebSocket Broadcasting → React UI
 
-### Data Hierarchy
-
-User (Authentication)  
-└── Projects (Logical Boundaries)  
-&emsp;&emsp;└── Events (Monitoring Data)
-
-### Component Architecture
 ```mermaid
 graph TB
-    A[External Applications] --> B[Ingestion API]
-    B --> C[MongoDB Storage]
-    C --> D[WebSocket Streaming]
-    D --> E[React Activity Feed]
+    A[External Applications] -->|REST / POST| B[Ingestion API]
+    B --> C{Validation & Auth}
+    C -->|Store| D[(MongoDB)]
+    D --> E[Socket.io Emitter]
+    E -->|WebSocket| F[React Dashboards]
     
-    F[User Authentication] --> G[Project Management]
-    G --> H[Event Processing]
-    H --> I[Real-Time Updates]
+    G[User Authentication OTP] --> H[Project Management]
+    H --> I[Event & Incident Tracking]
+    I --> J[Audit Logs]
 ```
+
 ---
 
 ## ✨ Features
 
 - **Identity & Security**
-  - JWT-based stateless authentication
-  - Bcrypt password hashing
-  - Protected route middleware
-  - Cross-user data isolation
+  - Secure OTP-based authentication workflows.
+  - JWT-based stateless sessions with bcrypt hashing.
+  - Express Rate Limiting, Helmet, and XSS protection.
 
 - **Project Management**
-  - Create monitoring projects
-  - Project-scoped data boundaries
-  - Ownership enforcement
-  - Resource isolation
+  - Create and manage monitoring projects.
+  - Strict project-scoped data boundaries.
 
-- **Event Ingestion**
-  - RESTful event ingestion endpoints
-  - Structured JSON validation
-  - Automatic project association
-  - Metadata support
+- **Event Ingestion & Processing**
+  - RESTful event ingestion endpoints (`POST /ingest/:projectId`).
+  - Structured data validation using Joi.
+  - Automatic persistence and project association.
 
-- **Real-Time Streaming** (Planned)
-  - WebSocket-based live updates
-  - Project-scoped subscriptions
-  - Efficient event broadcasting
-  - Connection management
+- **Incident & Audit Tracking**
+  - Incident escalations and management flow.
+  - Dedicated `AuditLog` for detailed security compliance tracking.
 
-- **High-Performance UI** (Planned)
-  - Virtualized event rendering
-  - Live event insertion
-  - Pause/resume functionality
-  - Advanced filtering
-  - Detail inspection panels
+- **Real-Time & UI Experience**
+  - Smooth micro-interactions powered by GSAP and Framer Motion.
+  - Virtualized rendering for high-volume event feeds (`react-window`).
 
 ---
 
 ## 🛠️ Tech Stack
 
-**Frontend:**
-- React 18+
-- Context API
-- React Router
-- Axios
-- Tailwind CSS
+### **Frontend**
+- **Core**: React 19, Vite 7, React Router DOM 7
+- **Styling & Animations**: TailwindCSS v4, GSAP, Framer Motion
+- **Data & Real-Time**: Axios, Socket.io-client, React Window
 
-**Backend:**
-- Node.js
-- Express.js
-- JWT (Authentication tokens)
-- Bcrypt (Password hashing)
-- Mongoose
-
-**Database:**
-- MongoDB (Indexed collections, aggregation pipeline)
-
-**Real-Time:**
-- WebSocket (Socket.io planned)
+### **Backend**
+- **Core**: Node.js, Express 5.x
+- **Database**: MongoDB & Mongoose
+- **Real-Time**: Socket.io
+- **Security & Validation**: Joi, Bcrypt, JsonWebToken, Helmet, Express Rate Limit, XSS-Clean
+- **Email Delivery**: @sendgrid/mail, Nodemailer
 
 ---
 
 ## 📂 Project Structure
 
-```
-opspulse/
-├── client/                 # React frontend
+```text
+apilogs/
+├── frontend/                 # React 19 / Vite Application
 │   ├── src/
-│   │   ├── components/
-│   │   ├── context/
-│   │   ├── pages/
-│   │   ├── api/
-│   │   └── utils/
-│   └── public/
-├── server/                 # Node.js backend
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   └── utils/
-├── docs/
-└── README.md
+│   │   ├── api/              # Axios service calls
+│   │   ├── assets/           # Static assets
+│   │   ├── components/       # Shared UI components
+│   │   ├── context/          # React context providers
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── pages/            # View components (Auth, Dashboard, Project, Event)
+│   │   ├── routes/           # Application routing logic
+│   │   └── utils/            # Helper functions
+│   └── package.json
+└── backend/                  # Node.js Express Server
+    ├── src/
+    │   ├── Database/         # MongoDB initialization
+    │   ├── controllers/      # Route logic handlers
+    │   ├── middleware/       # Auth, error, and security guards
+    │   ├── models/           # Mongoose schemas (Event, Incident, Project, Users, etc.)
+    │   ├── realtime/         # Socket.io event configurations
+    │   ├── routes/           # Express router definitions
+    │   ├── utils/            # Utilities (Email, Token generation)
+    │   └── validations/      # Joi validation schemas
+    └── package.json
 ```
 
 ---
@@ -167,281 +145,107 @@ opspulse/
 ## 🚀 Installation
 
 **Prerequisites**
-- Node.js 18+
+- Node.js 18+ or 20+
 - MongoDB 6+
 - npm or yarn
 
 **Quick Start**
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/opspulse.git
-cd opspulse
+git clone https://github.com/yourusername/apilogs.git
+cd apilogs
 
 # Install backend dependencies
-cd server
+cd backend
 npm install
 
 # Install frontend dependencies
-cd ../client
+cd ../frontend
 npm install
-
-# Backend environment setup
-cd ../server
-cp .env.example .env
-# Edit .env and set MongoDB URI and JWT secret
-
-# Start the application
-# Terminal 1 - backend
-cd server
-npm run dev
-
-# Terminal 2 - frontend
-cd ../client
-npm start
 ```
-Frontend: http://localhost:3000  
-Backend API: http://localhost:5000
+
+---
+
+## 🔐 Environment Variables
+
+You need to set up the appropriate `.env` files for both frontend and backend.
+
+**Backend (`backend/.env`)**
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/apilogs
+JWT_SECRET=your_super_secret_key
+SENDGRID_API_KEY=your_sendgrid_key
+# or SMTP details for Nodemailer
+```
+
+**Frontend (`frontend/.env`)**
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_SOCKET_URL=http://localhost:5000
+```
+
+---
+
+## 🏃‍♂️ Running the Application
+
+Open two separate terminals:
+
+**Terminal 1 - Backend Server**
+```bash
+cd backend
+npm start
+# Server runs on http://localhost:5000
+```
+
+**Terminal 2 - Frontend Client**
+```bash
+cd frontend
+npm run dev
+# Client runs on http://localhost:5173 (default Vite port)
+```
 
 ---
 
 ## 📚 API Documentation
 
-**Authentication Endpoints**
+### **Authentication**
+- `POST /api/auth/register` - Create user account
+- `POST /api/auth/login` - Initiate login workflow (Email/Password or OTP)
+- `POST /api/auth/verify-otp` - Verify OTP tokens
 
-- **Register User**
-  - `POST /api/auth/register`
-  - Content-Type: application/json
-  - Body:
-    ```json
-    {
-      "username": "john_doe",
-      "email": "john@example.com",
-      "password": "securePassword123"
-    }
-    ```
+### **Projects**
+- `POST /api/projects` - Create a monitoring project
+- `GET /api/projects` - List user projects
+- `GET /api/projects/:id` - Get specific project details
 
-- **Login User**
-  - `POST /api/auth/login`
-  - Content-Type: application/json
-  - Body:
-    ```json
-    {
-      "email": "john@example.com",
-      "password": "securePassword123"
-    }
-    ```
+### **Events/Ingestion**
+- `POST /api/ingest/:projectId` - Ingest a structured event for a specific project
+- `GET /api/events/:projectId` - Fetch event history
 
-**Project Endpoints**
-
-- **Create Project**
-  - `POST /api/projects`
-  - Authorization: Bearer <jwt_token>
-  - Content-Type: application/json
-  - Body:
-    ```json
-    {
-      "name": "Production API",
-      "description": "Main application monitoring"
-    }
-    ```
-- **List Projects**
-  - `GET /api/projects`
-  - Authorization: Bearer <jwt_token>
+### **Incidents**
+- `POST /api/incidents` - Create new incident report
+- `GET /api/incidents` - List and filter incidents
 
 ---
 
-# PHASE 3 — Event Ingestion Layer
+## 🛡️ Security
 
-## 🎯 Objective
-
-Enable external applications to send structured events to OpsPulse through a secure, project-scoped ingestion API.
-
-This phase introduces the platform’s core data entry mechanism.
-
----
-
-## What Was Implemented
-
-### 1️⃣ Project-Scoped Ingestion Endpoint
-
-A dedicated ingestion route was created:
-
-```
-POST /ingest/:projectId
-```
-
-Each event is explicitly associated with a specific project.
-
-This ensures:
-- Clear monitoring boundaries
-- Strict data ownership
-- Elimination of cross-project contamination
+- **Authentication Strategy**: Stateless JWT tokens for scalability.
+- **Password Hygiene**: Bcrypt hashing.
+- **OTP Verification**: Email-based one-time passwords via SendGrid/Nodemailer for enhanced login integrity.
+- **Middleware Protections**:
+  - `helmet`: Secures Express apps by setting various HTTP headers.
+  - `express-rate-limit`: Basic rate-limiting to defend against brute-force attacks.
+  - `xss-clean` & `express-mongo-sanitize`: Defense against injection attacks.
 
 ---
 
-### 2️⃣ Event Validation
+## ⚡ Performance & UX
 
-Incoming events are validated before processing.
-
-Each event must include structured fields such as:
-- `message`
-- `severity`
-- `timestamp`
-- (optional) `metadata`
-
-Invalid events are rejected with clear error responses.  
-This prevents malformed or inconsistent data from entering the system.
-
----
-
-### 3️⃣ Project Verification
-
-Before accepting an event:
-- The backend verifies that the project exists
-- The project ID in the route is validated
-- Only valid projects can receive events
-
-This guarantees all events belong to a legitimate monitoring target.
-
----
-
-### 4️⃣ Event Persistence
-
-Validated events are stored in the database with:
-- projectId
-- event details
-- creation timestamp
-
-This allows for:
-- Historical inspection
-- Future filtering and pagination
-
----
-
-### 5️⃣ Separation of Responsibilities
-
-The ingestion layer strictly:
-- Receives events
-- Validates input
-- Persists data
-
-It does **not**:
-- Render UI
-- Apply filtering logic
-- Handle streaming logic
-
-This separation keeps the system modular and scalable.
-
----
-
-## Data Flow Introduced in Phase 3
-
-```
-External App
-   ↓
-POST /ingest/:projectId
-   ↓
-Validation
-   ↓
-Project Verification
-   ↓
-Event stored in database
-```
-
-This establishes OpsPulse as an event-driven system.
-
----
-
-## Why Phase 3 Matters
-
-Phase 3 transforms OpsPulse from a user-management system into a genuine monitoring platform.
-
-It introduces:
-- Structured event ingestion
-- Project-level data boundaries
-- Persistent system activity records
-
-Without this phase, the monitoring system would have no authentic data source.
-
----
-
-## Stop Condition (Phase Complete When)
-
-- External systems can send events
-- Events are correctly linked to projects
-- Invalid data is rejected
-- Events persist in the database
-
----
-
-## Architectural Outcome
-
-After Phase 3:
-- Projects represent monitoring targets
-- Events capture system activity
-- Data boundaries are enforced at the project level
-- The system is ready for real-time streaming (Phase 4)
-
----
-
-## 🔒 Security
-
-**Authentication Strategy**
-- Stateless JWT tokens for scalability
-- Bcrypt hashing with salt rounds for password security
-- Middleware-based protection for all sensitive routes
-
-**Data Isolation**
-- Project-scoped queries prevent cross-user data access
-- Backend-controlled ownership
-- User context validated on every protected request
-
-**Security Headers**
-- CORS configuration
-- Rate limiting (Planned)
-- Input validation (Enforced)
-- NoSQL/SQL injection prevention
-
----
-
-## ⚡ Performance
-
-**Frontend Optimizations (Planned)**
-- Virtual scrolling for large datasets
-- Memoized components
-- Debounced filtering
-- Lazy loading
-
-**Backend Optimizations**
-- Database indexing
-- Connection pooling
-- Async/await patterns
-
-**Real-Time Performance (Planned)**
-- WebSocket management
-- Event batching and efficient updates
-
----
-
-## 🚧 Development Phases
-- ✅ Phase 1: Identity & Ownership (Completed)
-- ✅ Phase 2: Project Boundaries (Completed)
-- ✅ Phase 3: Event Ingestion (Completed)
-- 📋 Phase 4: Real-Time Streaming (Planned)
-- 📋 Phase 5: High-Performance UI (Planned)
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! See our Contributing Guidelines for details.
-
-**Development Workflow**
-- Fork the repository
-- Create a feature branch (`git checkout -b feature/amazing-feature`)
-- Commit your changes (`git commit -m 'Add amazing feature'`)
-- Push to the branch (`git push origin feature/amazing-feature`)
-- Open a Pull Request
+- **UI Rendering**: Leverages `react-window` for virtualizing massive event datasets, preventing DOM bloat.
+- **Animations**: Silky smooth interactions created with `GSAP` and `framer-motion`.
+- **Database Optimizations**: Mongoose schemas utilizing indexes on frequently queried fields (e.g., `projectId`, timestamps).
 
 ---
 
@@ -450,22 +254,9 @@ This project is licensed under the MIT License – see the `LICENSE` file for de
 
 ---
 
-## 🎯 Why OpsPulse?
-
-Unlike simple CRUD apps, OpsPulse demonstrates:
-- Event-driven architecture for real-world scalability
-- Multi-tenant security patterns as used in SaaS
-- Real-time system design with WebSocket streaming
-- Frontend performance engineering for large datasets
-- Production-focused authentication and authorization patterns
-
-Perfect for showcasing full-stack engineering skills in interviews and technical portfolios.
-
----
-
 ## 📞 Contact
 
 **Project Maintainer:** [Your Name]  
 GitHub: @yourusername  
-LinkedIn: Your LinkedIn  
+LinkedIn: [Your LinkedIn]  
 Email: your.email@example.com
