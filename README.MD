@@ -256,7 +256,7 @@ This project is licensed under the MIT License – see the `LICENSE` file for de
 
 ## 📞 Contact
 
-**Project Maintainer:** [Your Name]  
-GitHub: @yourusername  
-LinkedIn: [Your LinkedIn]  
-Email: your.email@example.com
+**Project Maintainer:** Peeyush 
+GitHub: peeyushtyagi09
+LinkedIn: https://www.linkedin.com/in/peeyush-tyagi-b9a481334/
+Email: peeyushtyagi82@gmail.com
