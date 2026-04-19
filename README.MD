@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  A production-grade, multi-tenant monitoring platform that ingests structured events, manages incidents, and renders them efficiently through a performance-optimized React interface utilizing real-time WebSockets.
+ A production-ready, multi-tenant monitoring platform for structured events and incident management, rendered efficiently via a performance-optimized React interface with real-time WebSockets.
 </p>
 
 <p align="center">
